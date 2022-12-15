@@ -68,9 +68,6 @@ def generator(album, resolution):
 
     palette = dominant_colors(album_art)
 
-    for i in range(len(palette)):
-        palette[i] = palette[i][::-1]
-
     num_colors = 10
     color_palette = np.ones((5, num_colors*100, 3), np.uint8)
     for i in range(num_colors):
@@ -115,9 +112,9 @@ if __name__ == '__main__':
     resolution = input("Enter height, width in pixels: ")
     if resolution == '':
         resolution = (5100, 3300, 3)
-
-    resolution = list(map(int, resolution.strip().split(',')))
-    resolution.append(3)
+    else:
+        resolution = list(map(int, resolution.strip().split(',')))
+        resolution.append(3)
 
     poster = generator(album, resolution)
 

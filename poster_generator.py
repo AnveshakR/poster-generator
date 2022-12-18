@@ -120,6 +120,8 @@ if __name__ == '__main__':
 
     poster = generator(album, resolution)
 
+    poster = cv2.cvtColor(poster, cv2.COLOR_RGB2BGR)
+
     cv2.imwrite("poster.jpg", poster)
 
     Image.open("poster.jpg").show()

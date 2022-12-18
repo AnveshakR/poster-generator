@@ -65,8 +65,9 @@ def font_scale_finder(text, scale, limit, thickness):
         if textsize[0][0] <= limit*scale:
             return i
 
-def dominant_colors(image):  # PIL image input
+def dominant_colors(image):
 
+    image = np.resize(image, (3*(image.shape[0])//4, 3*(image.shape[1])//4, image.shape[2]))
     ar = np.asarray(image)
     shape = ar.shape
     ar = ar.reshape(np.product(shape[:2]), shape[2]).astype(float)

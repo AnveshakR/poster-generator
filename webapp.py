@@ -20,7 +20,7 @@ def display_poster():
     return render_template("mainpage.html")
 
 
-@app.route('/result', methods = ['POST', 'GET'])
+@app.route('/', methods = ['POST', 'GET'])
 def result():
     if request.method == 'POST':
         album_link = request.form["album_input"]

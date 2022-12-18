@@ -100,6 +100,8 @@ def generator(album, resolution):
     # release date
     cv2.putText(poster, data['release_date'], (100, resolution[0]-100), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
 
+    poster = cv2.cvtColor(poster, cv2.COLOR_BGR2RGB)
+
     return(poster)
 
 if __name__ == '__main__':
@@ -121,3 +123,4 @@ if __name__ == '__main__':
     cv2.imwrite("poster.jpg", poster)
 
     Image.open("poster.jpg").show()
+ 

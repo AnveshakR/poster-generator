@@ -1,0 +1,9 @@
+python-dotenv==0.16.0
+requests==2.25.1
+numpy==1.21.6
+pillow==9.3.0
+opencv-python==4.5.5.64
+scikit-image==0.19.3
+scikit-learn==1.2.0
+scipy==1.8.0
+flask==2.2.2

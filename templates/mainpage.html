@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Poster Generator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        <h2>Spotify Poster Generator</h2>
+        <br>
+        <br>
+        <p>Enter Spotify Album Link</p>
+        <form method="POST" action="/result">
+            <input type="text" id="album_link" name="album_input">
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>

@@ -32,8 +32,8 @@ def result():
         poster_bytes.seek(0)
         poster_byte64 = b64encode(poster_bytes.getvalue()).decode('ascii')
 
-        return render_template("result.html", poster_base64 = poster_byte64)
+        return render_template("mainpage.html", poster_base64 = poster_byte64)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host = "0.0.0.0:$PORT")
+    app.run(debug=True)

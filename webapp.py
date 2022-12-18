@@ -15,9 +15,9 @@ app.config["SECRET_KEY"]=os.getenv('FLASK_SECRET')
 def index():
         return render_template('mainpage.html', PageTitle="Spotify Poster Generator")
 
-@app.route('/', methods = ['POST', 'GET'])
-def display_poster():
-    return render_template("mainpage.html")
+# @app.route('/', methods = ['POST', 'GET'])
+# def display_poster():
+#     return render_template("mainpage.html")
 
 
 @app.route('/', methods = ['POST', 'GET'])

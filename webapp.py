@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request 
+from flask import Flask, render_template, request, send_file
 from poster_generator import generator
 from PIL import Image
 import io
@@ -17,10 +17,25 @@ def index():
 
 # @app.route('/', methods = ['POST', 'GET'])
 # def display_poster():
-#     return render_template("mainpage.html")
+#     if request.method == 'POST':
+#         album_link = request.form["album_input"]
+
+#         poster, album_name = generator(album_link, (5100, 3300, 3))
+#         poster = Image.fromarray(poster)
+#         poster_bytes = io.BytesIO()
+#         poster.save(poster_bytes, "png")
+#         poster_bytes.seek(0)
+#         poster_byte64 = b64encode(poster_bytes.getvalue())
+
+#         return send_file(
+#             poster_byte64,
+#             mimetype='image/png',
+#             download_name='poster.png',
+#             as_attachment=True
+#         )
 
 
-@app.route('/', methods = ['POST', 'GET'])
+@app.route('/result', methods = ['POST', 'GET'])
 def result():
     if request.method == 'POST':
         album_link = request.form["album_input"]
@@ -32,7 +47,7 @@ def result():
         poster_bytes.seek(0)
         poster_byte64 = b64encode(poster_bytes.getvalue()).decode('ascii')
 
-        return render_template("mainpage.html", poster_base64 = poster_byte64)
+        return render_template("result.html", poster_base64 = poster_byte64)
 
 
 if __name__ == '__main__':

@@ -102,7 +102,7 @@ def generator(album, resolution):
 
     poster = cv2.cvtColor(poster, cv2.COLOR_BGR2RGB)
 
-    return(poster)
+    return(poster, data['album_name'])
 
 if __name__ == '__main__':
 
@@ -118,11 +118,11 @@ if __name__ == '__main__':
         resolution = list(map(int, resolution.strip().split(',')))
         resolution.append(3)
 
-    poster = generator(album, resolution)
+    poster, album_name = generator(album, resolution)
 
     poster = cv2.cvtColor(poster, cv2.COLOR_RGB2BGR)
 
-    cv2.imwrite("poster.jpg", poster)
+    cv2.imwrite("{}_poster.jpg".format(album_name), poster)
 
-    Image.open("poster.jpg").show()
+    Image.open("{}_poster.jpg".format(album_name)).show()
  

@@ -94,6 +94,12 @@ def generator(album, resolution):
             y_position += cv2.getTextSize(track_line, cv2.FONT_HERSHEY_PLAIN, 5, 10)[0][1] + 50
     cv2.putText(poster, track_line, (100, y_position), cv2.FONT_HERSHEY_PLAIN, 5, (0,0,0), 5)
 
+    #spotify logo
+    scale = 0.04
+    creditslogo = cv2.imread("spotifylogo.jpg")
+    creditslogo = cv2.resize(creditslogo, (int(resolution[0]*scale), int(resolution[0]*scale)))
+    poster[resolution[0]-100-creditslogo.shape[0]:resolution[0]-100, resolution[1]-100-creditslogo.shape[1]:resolution[1]-100] = creditslogo
+    
     # record label
     cv2.putText(poster, data['record'], (100, resolution[0]-163), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
 

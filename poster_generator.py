@@ -13,12 +13,11 @@ from PIL import Image
 import cv2
 from skimage import io
 from utils import *
-from spotify_data import data_pull
 
 
 def generator(album, resolution):
 
-    data = data_pull(album)
+    data = spotify_data_pull(album)
 
     spacing = 100
 
@@ -75,7 +74,7 @@ def generator(album, resolution):
     playtime_size = cv2.getTextSize(data['playtime'], cv2.FONT_HERSHEY_PLAIN, 3.5, 5)[0][0]
     cv2.putText(poster, data['playtime'], (resolution[1]-(2*spacing)-playtime_size, y_position), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
 
-    y_position += 2*spacing
+    y_position += spacing
 
     # color palette
 

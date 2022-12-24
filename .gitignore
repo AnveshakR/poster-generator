@@ -3,3 +3,4 @@ __pycache__/
 *.jpg
 *.ttf
 .env
+info.txt

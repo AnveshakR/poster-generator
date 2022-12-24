@@ -72,7 +72,7 @@ def generator(album, resolution):
 
     # playtime
     playtime_size = cv2.getTextSize(data['playtime'], cv2.FONT_HERSHEY_PLAIN, 3.5, 5)[0][0]
-    cv2.putText(poster, data['playtime'], (resolution[1]-(2*spacing)-playtime_size, y_position), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
+    cv2.putText(poster, data['playtime'], (resolution[1]-spacing-playtime_size, y_position), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
 
     y_position += spacing
 

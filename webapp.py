@@ -5,7 +5,7 @@
 
     poster-gen is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>. 
+    You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from flask import Flask, render_template, request, send_file
@@ -21,9 +21,10 @@ load_dotenv()
 app = Flask(__name__, instance_relative_config=True)
 app.config["SECRET_KEY"]=os.getenv('FLASK_SECRET')
 
+
 @app.route('/')
 def index():
-        return render_template('mainpage.html', PageTitle="Spotify Poster Generator")
+    return render_template('mainpage.html')
 
 
 @app.route('/result', methods = ['POST', 'GET'])
@@ -31,12 +32,22 @@ def result():
     if request.method == 'POST':
         album_link = request.form["album_input"]
 
+        # check that input is not empty
+        if album_link == "":
+            return render_template('mainpage.html', warning_notification='Input field cannot be empty')
+
+        # generate poster
         poster, album_name = generator(album_link, (5100, 3300, 3))
+
+        # check that album data was fetched
+        if poster is None or album_name is None:
+            return render_template('mainpage.html', warning_notification=f'Failed to get album data based on input "{album_link}"')
+
         poster = Image.fromarray(poster)
         poster_bytes = io.BytesIO()
         poster.save(poster_bytes, "png")
         poster_bytes.seek(0)
-    
+
         return send_file(
             poster_bytes,
             mimetype='image/png',

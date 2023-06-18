@@ -5,7 +5,7 @@
 
     poster-gen is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>. 
+    You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import cv2
@@ -17,22 +17,27 @@ import os
 import requests
 import datetime
 
-def spotify_data_pull(album):
+load_dotenv()
 
-    load_dotenv()
+
+def spotify_data_pull(album):
     SPOTIFY_SECRET = os.getenv('SPOTIFY_SECRET')
     SPOTIFY_ID = os.getenv('SPOTIFY_ID')
     album_url_base = r'https://open.spotify.com/album/'
     AUTH_URL = r'https://accounts.spotify.com/api/token'
     album_get = 'https://api.spotify.com/v1/albums/{id}'
 
+    # check format of album url
+    if album_url_base not in album:
+        return None
+
     album = album[:album.find('?')]
     id = album[album.find(album_url_base)+len(album_url_base):]
 
     auth_response = requests.post(AUTH_URL, {
-    'grant_type': 'client_credentials',
-    'client_id': SPOTIFY_ID,
-    'client_secret': SPOTIFY_SECRET,
+        'grant_type': 'client_credentials',
+        'client_id': SPOTIFY_ID,
+        'client_secret': SPOTIFY_SECRET,
     })
 
     auth_response_data = auth_response.json()
@@ -44,6 +49,10 @@ def spotify_data_pull(album):
     r = requests.get(album_get.format(id=id), headers=headers)
     r = r.json()
 
+    # ensure that response from Spotify contains necessary data
+    if 'tracks' not in r:
+        return None
+
     playtime = 0
     for i in r['tracks']['items']:
         playtime += i['duration_ms']
@@ -51,15 +60,15 @@ def spotify_data_pull(album):
     playtime = str(datetime.timedelta(seconds=playtime//1000))
     if playtime[0] == '0':
         playtime = playtime[2:]
-    
+
     tracks = []
     for i in r['tracks']['items']:
         tracks.append(i['name'])
-    
+
     album_art = r['images'][0]['url']
 
     data = {}
-    
+
     data.update({'album_name': r['name']})
     data.update({'album_artist': r['artists'][0]['name']})
     data.update({'record' : r['label']})
@@ -102,8 +111,8 @@ def rounded_rectangle(src, top_left, bottom_right, radius=1, color=255, thicknes
         bottom_right_rect_right = (p3[0], p3[1] - corner_radius)
 
         all_rects = [
-        [top_left_main_rect, bottom_right_main_rect], 
-        [top_left_rect_left, bottom_right_rect_left], 
+        [top_left_main_rect, bottom_right_main_rect],
+        [top_left_rect_left, bottom_right_rect_left],
         [top_left_rect_right, bottom_right_rect_right]]
 
         [cv2.rectangle(src, rect[0], rect[1], color, thickness) for rect in all_rects]

@@ -10,7 +10,7 @@ Enter a (valid) Spotify album URL, receive a poster!
 - [ ] Special characters not supported
 - [ ] No scaling for too many characters
 - [ ] Better font
-- [ ] No checking for validity of URL
+- [X] No checking for validity of URL
 - [ ] Choose poster size
   
 ---

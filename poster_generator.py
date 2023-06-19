@@ -5,7 +5,7 @@
 
     poster-gen is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>. 
+    You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import numpy as np
@@ -18,6 +18,10 @@ from utils import *
 def generator(album, resolution):
 
     data = spotify_data_pull(album)
+
+    # ensure that album data could be fetched
+    if data is None:
+        return None, None
 
     spacing = 100
 
@@ -51,7 +55,7 @@ def generator(album, resolution):
     for i in range(2*spacing, 50, -5):
         i = i/100
         textsize = cv2.getTextSize(data['album_artist'], cv2.FONT_HERSHEY_TRIPLEX, i*10, 15)
-      
+
         if textsize[0][0] <= (resolution[1]-2*spacing):
             font_scale = i*10
 
@@ -64,7 +68,7 @@ def generator(album, resolution):
     for i in range(2*spacing, 50, -5):
         i = i/100
         textsize = cv2.getTextSize(data['album_artist'], cv2.FONT_HERSHEY_TRIPLEX, i*10, 5)
-        
+
         if textsize[0][0] <= (resolution[1]-2*spacing):
             font_scale = i*10
 
@@ -98,7 +102,7 @@ def generator(album, resolution):
     for track in data['tracks']:
         if cv2.getTextSize(track_line, cv2.FONT_HERSHEY_PLAIN, 5, 10)[0][0] < resolution[1]-spacing:
             track_line = track_line + track + " | "
-            
+
         if cv2.getTextSize(track_line, cv2.FONT_HERSHEY_PLAIN, 5, 10)[0][0] >= resolution[1]-spacing:
             track_line = track_line[:len(track_line) - len(track + " | ")]
             cv2.putText(poster, track_line, (spacing, y_position), cv2.FONT_HERSHEY_PLAIN, 5, (0,0,0), 5)
@@ -111,7 +115,7 @@ def generator(album, resolution):
     creditslogo = cv2.imread("spotifylogo.jpg")
     creditslogo = cv2.resize(creditslogo, (int(resolution[0]*scale), int(resolution[0]*scale)))
     poster[resolution[0]-spacing-creditslogo.shape[0]:resolution[0]-spacing, resolution[1]-spacing-creditslogo.shape[1]:resolution[1]-spacing] = creditslogo
-    
+
     # record label
     cv2.putText(poster, data['record'], (spacing, resolution[0]-163), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
 
@@ -143,4 +147,3 @@ if __name__ == '__main__':
     cv2.imwrite("{}_poster.jpg".format(album_name), poster)
 
     Image.open("{}_poster.jpg".format(album_name)).show()
- 

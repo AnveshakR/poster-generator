@@ -13,14 +13,37 @@ from PIL import Image, ImageFont, ImageDraw
 from skimage import io
 from utils import *
 import langid
+import sys
+import shutil
+import os
+
+MAINPATH = os.path.dirname(os.path.realpath(__file__))
+
+if sys.platform.startswith('win') or sys.platform.startswith('cygwin'):
+    FONTDIRS = os.path.join(os.environ['WINDIR'], 'Fonts')
+elif sys.platform.startswith('darwin'):
+    FONTDIR = os.path.join(os.path.expanduser("~"), ".fonts")
+else: # linux, *bsd and everything else
+    FONTDIR = os.path.join(os.path.expanduser("~"), ".fonts")
+    
+print(FONTDIR)
+if not os.path.exists(FONTDIR):
+    os.mkdir(FONTDIR)
+
+fonts = {'open-sans.bold.ttf':"", 'source-code-pro.light.ttf':""}
+
+for font in fonts.keys():
+    shutil.copy2(os.path.join(MAINPATH, "fonts", font), os.path.join(FONTDIR, font))
+    fonts[font] = os.path.join(FONTDIR, font)
+    
 
 def generator(album, resolution) -> ImageDraw:
 
-    with open('fonts/open-sans.bold.ttf', 'rb') as f:
+    with open(fonts['open-sans.bold.ttf'], 'rb') as f:
         open_sans = ImageFont.truetype(f)
         f.close()
 
-    with open('fonts/source-code-pro.light.ttf', 'rb') as f:
+    with open(fonts['source-code-pro.light.ttf'], 'rb') as f:
         source_code = ImageFont.truetype(f)
         f.close()
 
@@ -54,7 +77,7 @@ def generator(album, resolution) -> ImageDraw:
 
     # album artist
     for i in range(200, 1, -5):
-        open_sans = ImageFont.truetype('open-sans.bold.ttf', i)
+        open_sans = ImageFont.truetype(fonts['open-sans.bold.ttf'], i)
         text_size = open_sans.getlength(data['album_artist'])
         if text_size < (resolution[0]-200)/2:
             break
@@ -66,7 +89,7 @@ def generator(album, resolution) -> ImageDraw:
     # album name
     source_code_fontsize = 0
     for i in range(100, 1, -5):
-        source_code = ImageFont.truetype('source-code-pro.light.ttf', i)
+        source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], i)
         text_size = source_code.getlength(data['album_name'])
         if text_size <= (resolution[0]-2*spacing)/2:
             source_code_fontsize = i
@@ -75,7 +98,7 @@ def generator(album, resolution) -> ImageDraw:
     poster_draw.text((spacing, y_position), data['album_name'], (0,0,0), font=source_code)
 
     # playtime
-    source_code = ImageFont.truetype('source-code-pro.light.ttf', source_code_fontsize//2)
+    source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], source_code_fontsize//2)
     poster_draw.text((resolution[0] - spacing - source_code.getbbox(data['playtime'])[2], y_position), data['playtime'], (0,0,0), font=source_code)
 
     y_position += 2*spacing
@@ -86,14 +109,14 @@ def generator(album, resolution) -> ImageDraw:
 
     x_posn = spacing
     for color in palette:
-        poster_draw.rectangle([x_posn, y_position, x_posn+(resolution[0] - 2*spacing)/10, y_position+50], tuple(color), 100)
+        poster_draw.rectangle([x_posn, y_position, x_posn+(resolution[0] - 2*spacing)/10, y_position+50], fill=tuple(color), width=50)
         x_posn += (resolution[0] - 2*spacing)/10
 
     y_position += spacing
 
     # tracks
 
-    source_code = ImageFont.truetype('source-code-pro.light.ttf', source_code_fontsize)
+    source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], source_code_fontsize)
     track_line = ""
     for track in data['tracks']:
         if source_code.getlength(track_line) < resolution[0] - spacing:
@@ -110,7 +133,7 @@ def generator(album, resolution) -> ImageDraw:
     # NOTE: Replace with spotify scan code
 
     # record label
-    source_code = ImageFont.truetype('source-code-pro.light.ttf', source_code_fontsize//2)
+    source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], source_code_fontsize//2)
     poster_draw.text((spacing, resolution[1] - 163), data['record'], (0,0,0), source_code)
 
     # release date

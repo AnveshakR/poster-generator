@@ -16,8 +16,13 @@ import langid
 
 def generator(album, resolution) -> ImageDraw:
 
-    open_sans = ImageFont.truetype('open-sans.bold.ttf')
-    source_code = ImageFont.truetype('source-code-pro.light.ttf')
+    with open('fonts/open-sans.bold.ttf', 'rb') as f:
+        open_sans = ImageFont.truetype(f)
+        f.close()
+
+    with open('fonts/source-code-pro.light.ttf', 'rb') as f:
+        source_code = ImageFont.truetype(f)
+        f.close()
 
     data = spotify_data_pull(album)
 

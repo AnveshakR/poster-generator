@@ -152,7 +152,7 @@ def dominant_colors(image):
         n_clusters=10,
         init="k-means++",
         max_iter=20,
-        random_state=1000
+        n_init=3
     ).fit(ar)
     codes = kmeans.cluster_centers_
 

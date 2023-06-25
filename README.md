@@ -6,13 +6,15 @@ Does what it says on the tin.
 
 Enter a (valid) Spotify album URL, receive a poster!
 
-### Issues/Limitations (to be fixed maybe):
-- [ ] Special characters not supported
-- [ ] No scaling for too many characters
-- [ ] Better font
-- [X] No checking for validity of URL
+### Issues/Ideas
 - [ ] Choose poster size
+- [ ] Tracks vertical length scaling
+- [ ] Drop down menu in main webpage to search for album
   
+### Fixed Issues 🎉
+- [x] Special characters not supported
+- [x] Better font
+- [X] No checking for validity of URL
 ---
 
 You'll need a .env file with the following values:

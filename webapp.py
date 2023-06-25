@@ -37,13 +37,12 @@ def result():
             return render_template('mainpage.html', warning_notification='Input field cannot be empty')
 
         # generate poster
-        poster, album_name = generator(album_link, (5100, 3300, 3))
+        poster, album_name = generator(album_link, (3300, 5100))
 
         # check that album data was fetched
         if poster is None or album_name is None:
             return render_template('mainpage.html', warning_notification=f'Failed to get album data based on input "{album_link}"')
-
-        poster = Image.fromarray(poster)
+        
         poster_bytes = io.BytesIO()
         poster.save(poster_bytes, "png")
         poster_bytes.seek(0)

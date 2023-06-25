@@ -9,13 +9,15 @@
 """
 
 import numpy as np
-from PIL import Image
-import cv2
+from PIL import Image, ImageFont, ImageDraw
 from skimage import io
 from utils import *
+import langid
 
+def generator(album, resolution) -> ImageDraw:
 
-def generator(album, resolution):
+    open_sans = ImageFont.truetype('open-sans.bold.ttf')
+    source_code = ImageFont.truetype('source-code-pro.light.ttf')
 
     data = spotify_data_pull(album)
 
@@ -24,105 +26,90 @@ def generator(album, resolution):
         return None, None
 
     spacing = 100
+    y_position = 0
 
-    y_position = 2*spacing
-
-    # define poster size
-    poster = np.ones(resolution, np.uint8)
-    poster = poster*255
+    # define poster
+    poster = Image.new('RGBA', resolution, color=(255,255,255,255))
 
     # album art
     album_art = io.imread(data['album_art'])
-    album_art = cv2.resize(album_art, (resolution[1]-2*spacing, resolution[1]-2*spacing), cv2.INTER_AREA)
-    album_art = cv2.cvtColor(album_art, cv2.COLOR_RGB2BGR)
+    album_art = Image.fromarray(album_art)
+    album_art = album_art.resize((resolution[0]-200, resolution[0]-200))
 
-    mask = np.zeros((album_art.shape[0], album_art.shape[1]), np.uint8)
+    mask = np.zeros(album_art.size, np.uint8)
+    mask = rounded_rectangle(mask, (0,0), album_art.size, 0.1, color=(255,255,255), thickness=-1)
+    mask = Image.fromarray(mask)
 
-    mask = rounded_rectangle(mask, (0,0), (album_art.shape[0], album_art.shape[1]), 0.1, color=(255,255,255), thickness=-1)
+    poster.paste(album_art, (spacing, spacing), mask)
 
-    art_inv = cv2.bitwise_not(album_art)
+    y_position += resolution[0] + spacing
 
-    album_art = cv2.bitwise_not(cv2.bitwise_and(art_inv, art_inv, mask=mask))
-
-    x_offset = y_offset = spacing
-
-    poster[y_offset:y_offset+album_art.shape[0], x_offset:x_offset+album_art.shape[1]] = album_art
-
-    y_position += album_art.shape[0] + 2*spacing
+    # make the poster drawable
+    poster_draw = ImageDraw.Draw(poster, 'RGBA')
 
     # album artist
-    font_scale = 0
-    for i in range(2*spacing, 50, -5):
-        i = i/100
-        textsize = cv2.getTextSize(data['album_artist'], cv2.FONT_HERSHEY_TRIPLEX, i*10, 15)
+    for i in range(200, 1, -5):
+        open_sans = ImageFont.truetype('open-sans.bold.ttf', i)
+        text_size = open_sans.getlength(data['album_artist'])
+        if text_size < (resolution[0]-200)/2:
+            break
 
-        if textsize[0][0] <= (resolution[1]-2*spacing):
-            font_scale = i*10
+    poster_draw.text((100, y_position), data['album_artist'],(0,0,0), font=open_sans, language=langid.classify(data['album_artist'])[0])
 
-    cv2.putText(poster, data['album_artist'], (spacing, y_position), cv2.FONT_HERSHEY_TRIPLEX, font_scale, (0,0,0), 15)
-
-    y_position += 2*spacing
+    y_position += open_sans.getbbox(data['album_artist'])[3] + spacing
 
     # album name
-    font_scale = 0
-    for i in range(2*spacing, 50, -5):
-        i = i/100
-        textsize = cv2.getTextSize(data['album_artist'], cv2.FONT_HERSHEY_TRIPLEX, i*10, 5)
+    source_code_fontsize = 0
+    for i in range(100, 1, -5):
+        source_code = ImageFont.truetype('source-code-pro.light.ttf', i)
+        text_size = source_code.getlength(data['album_name'])
+        if text_size <= (resolution[0]-2*spacing)/2:
+            source_code_fontsize = i
+            break
 
-        if textsize[0][0] <= (resolution[1]-2*spacing):
-            font_scale = i*10
-
-    cv2.putText(poster, data['album_name'], (spacing, y_position), cv2.FONT_HERSHEY_PLAIN, font_scale, (0,0,0), 5)
+    poster_draw.text((spacing, y_position), data['album_name'], (0,0,0), font=source_code)
 
     # playtime
-    playtime_size = cv2.getTextSize(data['playtime'], cv2.FONT_HERSHEY_PLAIN, 3.5, 5)[0][0]
-    cv2.putText(poster, data['playtime'], (resolution[1]-spacing-playtime_size, y_position), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
+    source_code = ImageFont.truetype('source-code-pro.light.ttf', source_code_fontsize//2)
+    poster_draw.text((resolution[0] - spacing - source_code.getbbox(data['playtime'])[2], y_position), data['playtime'], (0,0,0), font=source_code)
 
-    y_position += spacing
+    y_position += 2*spacing
 
     # color palette
 
-    palette = dominant_colors(album_art)
+    palette = dominant_colors(np.array(album_art))
 
-    num_colors = 10
-    color_palette = np.ones((5, num_colors*100, 3), np.uint8)
-    for i in range(num_colors):
-        section = 100*(i+1)
-        cv2.rectangle(color_palette, (section-100,0), (section, 100), palette[i], -1)
+    x_posn = spacing
+    for color in palette:
+        poster_draw.rectangle([x_posn, y_position, x_posn+(resolution[0] - 2*spacing)/10, y_position+50], tuple(color), 100)
+        x_posn += (resolution[0] - 2*spacing)/10
 
-    color_palette = cv2.resize(color_palette, (resolution[1]-2*spacing, 50), cv2.INTER_AREA)
-
-    poster[y_position:y_position+color_palette.shape[0], x_offset:x_offset+color_palette.shape[1]] = color_palette
-
-    y_position += 2*spacing
+    y_position += spacing
 
     # tracks
 
+    source_code = ImageFont.truetype('source-code-pro.light.ttf', source_code_fontsize)
     track_line = ""
     for track in data['tracks']:
-        if cv2.getTextSize(track_line, cv2.FONT_HERSHEY_PLAIN, 5, 10)[0][0] < resolution[1]-spacing:
+        if source_code.getlength(track_line) < resolution[0] - spacing:
             track_line = track_line + track + " | "
-
-        if cv2.getTextSize(track_line, cv2.FONT_HERSHEY_PLAIN, 5, 10)[0][0] >= resolution[1]-spacing:
+            
+        if source_code.getlength(track_line) >= resolution[0] - spacing:
             track_line = track_line[:len(track_line) - len(track + " | ")]
-            cv2.putText(poster, track_line, (spacing, y_position), cv2.FONT_HERSHEY_PLAIN, 5, (0,0,0), 5)
+            poster_draw.text((spacing, y_position), track_line, (0,0,0), font=source_code)
             track_line = track + " | "
-            y_position += cv2.getTextSize(track_line, cv2.FONT_HERSHEY_PLAIN, 5, 10)[0][1] + 50
-    cv2.putText(poster, track_line, (spacing, y_position), cv2.FONT_HERSHEY_PLAIN, 5, (0,0,0), 5)
+            y_position += source_code.getbbox(track_line)[3]
 
-    #spotify logo
-    scale = 0.04
-    creditslogo = cv2.imread("spotifylogo.jpg")
-    creditslogo = cv2.resize(creditslogo, (int(resolution[0]*scale), int(resolution[0]*scale)))
-    poster[resolution[0]-spacing-creditslogo.shape[0]:resolution[0]-spacing, resolution[1]-spacing-creditslogo.shape[1]:resolution[1]-spacing] = creditslogo
+    poster_draw.text((spacing, y_position), track_line, (0,0,0), font=source_code)
+
+    # NOTE: Replace with spotify scan code
 
     # record label
-    cv2.putText(poster, data['record'], (spacing, resolution[0]-163), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
+    source_code = ImageFont.truetype('source-code-pro.light.ttf', source_code_fontsize//2)
+    poster_draw.text((spacing, resolution[1] - 163), data['record'], (0,0,0), source_code)
 
     # release date
-    cv2.putText(poster, data['release_date'], (spacing, resolution[0]-spacing), cv2.FONT_HERSHEY_PLAIN, 3.5, (0,0,0), 5)
-
-    poster = cv2.cvtColor(poster, cv2.COLOR_BGR2RGB)
+    poster_draw.text((spacing, resolution[1] - spacing), data['release_date'], (0,0,0), source_code)
 
     return(poster, data['album_name'])
 
@@ -135,15 +122,13 @@ if __name__ == '__main__':
 
     resolution = input("Enter height, width in pixels: ")
     if resolution == '':
-        resolution = (5100, 3300, 3)
+        resolution = (3300, 5100)
     else:
         resolution = list(map(int, resolution.strip().split(',')))
-        resolution.append(3)
+        resolution.append(2)
 
     poster, album_name = generator(album, resolution)
 
-    poster = cv2.cvtColor(poster, cv2.COLOR_RGB2BGR)
+    poster.save(f"{album_name}_poster.png")
 
-    cv2.imwrite("{}_poster.jpg".format(album_name), poster)
-
-    Image.open("{}_poster.jpg".format(album_name)).show()
+    poster.show()

@@ -1,7 +1,6 @@
 __pycache__/
 *.ipynb
 *.jpg
-*.ttf
+*.png
 .env
 info.txt
-!spotifylogo.jpg

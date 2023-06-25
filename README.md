@@ -5,6 +5,7 @@ https://poster-generator.up.railway.app/
 Does what it says on the tin.
 
 Enter a (valid) Spotify album URL, receive a poster!
+[Example Images](https://imgur.com/a/js908oH)!
 
 ### Issues/Ideas
 - [ ] Choose poster size

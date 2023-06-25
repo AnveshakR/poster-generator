@@ -1,4 +1,5 @@
-FROM python:3.8-slim-buster
+FROM debian:bullseye-slim
+ENV PYTHON_VERSION 3.10.6
 COPY . /app
 WORKDIR /app
 RUN apt-get update

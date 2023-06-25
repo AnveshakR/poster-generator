@@ -1,5 +1,4 @@
-FROM debian:bullseye-slim
-ENV PYTHON_VERSION 3.10.6
+FROM python:3.10-slim
 COPY . /app
 WORKDIR /app
 RUN apt-get update

@@ -8,14 +8,14 @@ Enter a (valid) Spotify album URL, receive a poster!
 [Example Images](https://imgur.com/a/js908oH)!
 
 ### Issues/Ideas
-- [ ] Choose poster size
 - [ ] Tracks vertical length scaling
 - [ ] Drop down menu in main webpage to search for album
   
 ### Fixed Issues 🎉
+- [x] Choose poster size
 - [x] Special characters not supported
 - [x] Better font
-- [X] No checking for validity of URL
+- [x] No checking for validity of URL
 ---
 
 You'll need a .env file with the following values:

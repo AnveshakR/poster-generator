@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 import os
 import requests
 import datetime
+from io import BytesIO
+from PIL import Image
+
 
 load_dotenv()
 
@@ -69,6 +72,7 @@ def spotify_data_pull(album):
 
     data = {}
 
+    data.update({'album_id': id})
     data.update({'album_name': r['name']})
     data.update({'album_artist': r['artists'][0]['name']})
     data.update({'record' : r['label']})
@@ -78,6 +82,7 @@ def spotify_data_pull(album):
     data.update({'album_art': album_art})
 
     return data
+
 
 def rounded_rectangle(src, top_left, bottom_right, radius=1, color=255, thickness=1, line_type=cv2.LINE_AA):
 
@@ -141,6 +146,7 @@ def font_scale_finder(text, scale, limit, thickness):
         if textsize[0][0] <= limit*scale:
             return i
 
+
 def dominant_colors(image):
 
     image = np.resize(image, (3*(image.shape[0])//4, 3*(image.shape[1])//4, image.shape[2]))
@@ -163,3 +169,13 @@ def dominant_colors(image):
     for index in np.argsort(counts)[::-1]:
         colors.append([int(code) for code in codes[index]])
     return colors                    # returns colors in order of dominance
+
+
+def image_from_url(url: str):
+    r = requests.get(url, stream=True)
+    if r.ok is True:
+        # Load the image using BytesIO and open it with PIL
+        image_data = BytesIO(r.content)
+        return Image.open(image_data)
+    else:
+        return None

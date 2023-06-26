@@ -25,7 +25,7 @@ elif sys.platform.startswith('darwin'):
     FONTDIR = os.path.join(os.path.expanduser("~"), ".fonts")
 else: # linux, *bsd and everything else
     FONTDIR = os.path.join(os.path.expanduser("~"), ".fonts")
-    
+
 print(FONTDIR)
 if not os.path.exists(FONTDIR):
     os.mkdir(FONTDIR)
@@ -35,7 +35,7 @@ fonts = {'open-sans.bold.ttf':"", 'source-code-pro.light.ttf':""}
 for font in fonts.keys():
     shutil.copy2(os.path.join(MAINPATH, "fonts", font), os.path.join(FONTDIR, font))
     fonts[font] = os.path.join(FONTDIR, font)
-    
+
 
 def generator(album, resolution) -> ImageDraw:
 
@@ -121,7 +121,7 @@ def generator(album, resolution) -> ImageDraw:
     for track in data['tracks']:
         if source_code.getlength(track_line) < resolution[0] - spacing:
             track_line = track_line + track + " | "
-            
+
         if source_code.getlength(track_line) >= resolution[0] - spacing:
             track_line = track_line[:len(track_line) - len(track + " | ")]
             poster_draw.text((spacing, y_position), track_line, (0,0,0), font=source_code)
@@ -130,7 +130,18 @@ def generator(album, resolution) -> ImageDraw:
 
     poster_draw.text((spacing, y_position), track_line, (0,0,0), font=source_code)
 
-    # NOTE: Replace with spotify scan code
+    # spotify scan code
+    size = round(resolution[1] / 5)  # absolute width of requested spotify code
+    spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/FFFFFF/black/{size}/spotify:album:{data["album_id"]}'
+    spotify_code = image_from_url(spotify_code_url)
+
+    if spotify_code is not None:
+        scale = 0.16  # relative width of displayed spotify code
+        space_from_sides = int(resolution[0] * 0.015)  # amount of added padding
+        code_dimensions = (int(resolution[0] * scale), int(resolution[0] * scale / 4))
+        code_position = (resolution[0] - code_dimensions[0] * 2 - space_from_sides, resolution[1] - code_dimensions[1] * 2 - space_from_sides)
+        spotify_code.resize(code_dimensions)
+        poster.paste(spotify_code, code_position)
 
     # record label
     source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], source_code_fontsize//2)
@@ -139,7 +150,8 @@ def generator(album, resolution) -> ImageDraw:
     # release date
     poster_draw.text((spacing, resolution[1] - spacing), data['release_date'], (0,0,0), source_code)
 
-    return(poster, data['album_name'])
+    return poster, data['album_name']
+
 
 if __name__ == '__main__':
 

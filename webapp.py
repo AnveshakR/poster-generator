@@ -29,12 +29,18 @@ def index():
 def result():
     if request.method == 'POST':
         album_link = request.form["album_input"]
-        width = 3300 if 'width' not in request.form else int(request.form["width"])
-        height = 5100 if 'height' not in request.form else int(request.form["height"])
+        width = 3300 if 'width' not in request.form or not request.form["width"].isnumeric() else int(request.form["width"])
+        height = 5100 if 'height' not in request.form or not request.form["height"].isnumeric() else int(request.form["height"])
 
         # check that input is not empty
         if album_link == "" or album_link is None:
             return render_template('mainpage.html', warning_notification='Input field cannot be empty')
+
+        # check values for height and width
+        if width < 300 or height < 450:  # width and height have minimum requirements
+            return render_template('mainpage.html', warning_notification='Width must be at least 300px and height must be at least 450px')
+        if height < width * 1.25 or height > width * 2:  # height must be between 30% and 100% larger than width
+            return render_template('mainpage.html', warning_notification='Height must be between 25% and 100% larger than width')
 
         # generate poster
         poster, album_name = generator(album_link, (width, height))

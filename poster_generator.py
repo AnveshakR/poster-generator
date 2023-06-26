@@ -125,7 +125,8 @@ def generator(album, resolution) -> ImageDraw:
     #
     playtime_font_size = int(album_font_size//1.5)
     playtime_font = ImageFont.truetype(fonts['source-code-pro.light.ttf'], playtime_font_size)
-    poster_draw.text((resolution[0] - spacing - playtime_font.getbbox(data['playtime'])[2], y_position), data['playtime'], (0,0,0), font=playtime_font)
+    playtime_y_position = y_position + int(artist_font.size/2.25) - playtime_font.size  # align playtime with bottom of album name instead of top
+    poster_draw.text((resolution[0] - spacing - playtime_font.getbbox(data['playtime'])[2], playtime_y_position), data['playtime'], (0,0,0), font=playtime_font)
 
     y_position += 2*spacing
 

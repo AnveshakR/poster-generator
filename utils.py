@@ -18,7 +18,7 @@ import requests
 import datetime
 from io import BytesIO
 from PIL import Image
-
+import langid
 
 load_dotenv()
 
@@ -73,9 +73,9 @@ def spotify_data_pull(album):
     data = {}
 
     data.update({'album_id': id})
-    data.update({'album_name': r['name']})
-    data.update({'album_artist': r['artists'][0]['name']})
-    data.update({'record' : r['label']})
+    data.update({'album_name': [r['name'], langid.classify(r['name'])]})
+    data.update({'album_artist': [r['artists'][0]['name'], langid.classify(r['artists'][0]['name'])]})
+    data.update({'record' : [r['label'], langid.classify(r['label'])]})
     data.update({'release_date' : datetime.datetime.strptime(r['release_date'].replace('-',''), r'%Y%m%d').strftime(r'%B %d, %Y')})
     data.update({'playtime' : playtime})
     data.update({'tracks' : tracks})

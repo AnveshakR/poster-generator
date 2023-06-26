@@ -4,3 +4,5 @@ __pycache__/
 *.png
 .env
 info.txt
+postergen-env
+.python-version

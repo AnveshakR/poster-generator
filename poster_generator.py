@@ -19,33 +19,37 @@ import os
 
 MAINPATH = os.path.dirname(os.path.realpath(__file__))
 
-if sys.platform.startswith('win') or sys.platform.startswith('cygwin'):
-    FONTDIRS = os.path.join(os.environ['WINDIR'], 'Fonts')
-elif sys.platform.startswith('darwin'):
-    FONTDIR = os.path.join(os.path.expanduser("~"), ".fonts")
-else: # linux, *bsd and everything else
-    FONTDIR = os.path.join(os.path.expanduser("~"), ".fonts")
+FONTDIR = os.path.join(MAINPATH, 'fonts')
 
-print(FONTDIR)
-if not os.path.exists(FONTDIR):
-    os.mkdir(FONTDIR)
-
-fonts = {'open-sans.bold.ttf':"", 'source-code-pro.light.ttf':""}
+fonts = {'NotoSansJP-Bold.ttf':"", 
+         'NotoSansJP-Thin.ttf':"", 
+         'open-sans.bold.ttf':"", 
+         'source-code-pro.light.ttf':"", 
+         'NotoSansTC-Thin.otf': "",
+         'NotoSansTC-Bold.otf': ""}
 
 for font in fonts.keys():
-    shutil.copy2(os.path.join(MAINPATH, "fonts", font), os.path.join(FONTDIR, font))
     fonts[font] = os.path.join(FONTDIR, font)
+    
+def get_font_by_lang(langid_classify, text_type):
+    
+    if text_type == "bold":
+        if langid_classify[0] == 'ja':
+            return fonts['NotoSansJP-Bold.ttf']
+        elif langid_classify[0] == 'zh':
+            return fonts['NotoSansTC-Bold.otf']
+        else:
+            return fonts['open-sans.bold.ttf']
+    elif text_type == "thin":
+        if langid_classify[0] == 'ja':
+            return fonts['NotoSansJP-Thin.ttf']
+        elif langid_classify[0] == 'zh':
+            return fonts['NotoSansTC-Thin.otf']
+        else:
+            return fonts['source-code-pro.light.ttf']
 
 
 def generator(album, resolution) -> ImageDraw:
-
-    with open(fonts['open-sans.bold.ttf'], 'rb') as f:
-        open_sans = ImageFont.truetype(f)
-        f.close()
-
-    with open(fonts['source-code-pro.light.ttf'], 'rb') as f:
-        source_code = ImageFont.truetype(f)
-        f.close()
 
     data = spotify_data_pull(album)
 
@@ -77,58 +81,57 @@ def generator(album, resolution) -> ImageDraw:
 
     # album artist
     for i in range(200, 1, -5):
-        open_sans = ImageFont.truetype(fonts['open-sans.bold.ttf'], i)
-        text_size = open_sans.getlength(data['album_artist'])
+        bold_font = ImageFont.truetype(get_font_by_lang(data['album_artist'][1], "bold"), i)
+            
+        text_size = bold_font.getlength(data['album_artist'][0])
         if text_size < (resolution[0]-200)/2:
             break
 
-    poster_draw.text((100, y_position), data['album_artist'],(0,0,0), font=open_sans, language=langid.classify(data['album_artist'])[0])
+    poster_draw.text((100, y_position), data['album_artist'][0],(0,0,0), font=bold_font)
 
-    y_position += open_sans.getbbox(data['album_artist'])[3] + spacing
+    y_position += bold_font.getbbox(data['album_artist'][0])[3] + spacing
 
     # album name
-    source_code_fontsize = 0
+    thin_font_size = 0
     for i in range(100, 1, -5):
-        source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], i)
-        text_size = source_code.getlength(data['album_name'])
+        thin_font = ImageFont.truetype(get_font_by_lang(data['album_name'][1], "thin"), i)
+        text_size = thin_font.getlength(data['album_name'][0])
         if text_size <= (resolution[0]-2*spacing)/2:
-            source_code_fontsize = i
+            thin_font_size = i
             break
 
-    poster_draw.text((spacing, y_position), data['album_name'], (0,0,0), font=source_code)
+    poster_draw.text((spacing, y_position), data['album_name'][0], (0,0,0), font=thin_font)
 
     # playtime
-    source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], source_code_fontsize//2)
-    poster_draw.text((resolution[0] - spacing - source_code.getbbox(data['playtime'])[2], y_position), data['playtime'], (0,0,0), font=source_code)
+    thin_font = ImageFont.truetype(fonts['source-code-pro.light.ttf'], thin_font_size//2)
+    poster_draw.text((resolution[0] - spacing - thin_font.getbbox(data['playtime'])[2], y_position), data['playtime'], (0,0,0), font=thin_font)
 
     y_position += 2*spacing
 
     # color palette
-
     palette = dominant_colors(np.array(album_art))
 
     x_posn = spacing
     for color in palette:
-        poster_draw.rectangle([x_posn, y_position, x_posn+(resolution[0] - 2*spacing)/10, y_position+50], fill=tuple(color), width=50)
-        x_posn += (resolution[0] - 2*spacing)/10
+        poster_draw.rectangle([x_posn, y_position, x_posn+(resolution[0] - 2*spacing)/len(palette), y_position+50], fill=tuple(color), width=50)
+        x_posn += (resolution[0] - 2*spacing)/len(palette)
 
     y_position += spacing
 
     # tracks
-
-    source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], source_code_fontsize)
+    thin_font = ImageFont.truetype(fonts['NotoSansJP-Thin.ttf'], thin_font_size)
     track_line = ""
     for track in data['tracks']:
-        if source_code.getlength(track_line) < resolution[0] - spacing:
+        if thin_font.getlength(track_line) < resolution[0] - spacing:
             track_line = track_line + track + " | "
 
-        if source_code.getlength(track_line) >= resolution[0] - spacing:
+        if thin_font.getlength(track_line) >= resolution[0] - spacing:
             track_line = track_line[:len(track_line) - len(track + " | ")]
-            poster_draw.text((spacing, y_position), track_line, (0,0,0), font=source_code)
+            poster_draw.text((spacing, y_position), track_line, (0,0,0), font=thin_font)
             track_line = track + " | "
-            y_position += source_code.getbbox(track_line)[3]
+            y_position += thin_font.getbbox(track_line)[3]
 
-    poster_draw.text((spacing, y_position), track_line, (0,0,0), font=source_code)
+    poster_draw.text((spacing, y_position), track_line, (0,0,0), font=thin_font)
 
     # spotify scan code
     size = round(resolution[1] / 5)  # absolute width of requested spotify code
@@ -144,13 +147,13 @@ def generator(album, resolution) -> ImageDraw:
         poster.paste(spotify_code, code_position)
 
     # record label
-    source_code = ImageFont.truetype(fonts['source-code-pro.light.ttf'], source_code_fontsize//2)
-    poster_draw.text((spacing, resolution[1] - 163), data['record'], (0,0,0), source_code)
+    thin_font = ImageFont.truetype(get_font_by_lang(data['record'][1], "thin"), thin_font_size//2)
+    poster_draw.text((spacing, resolution[1] - spacing - 63), data['record'][0], (0,0,0), thin_font)
 
     # release date
-    poster_draw.text((spacing, resolution[1] - spacing), data['release_date'], (0,0,0), source_code)
+    poster_draw.text((spacing, resolution[1] - spacing), data['release_date'], (0,0,0), thin_font)
 
-    return poster, data['album_name']
+    return poster, data['album_name'][0]
 
 
 if __name__ == '__main__':

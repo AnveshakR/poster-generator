@@ -8,11 +8,9 @@
     You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, redirect
 from poster_generator import generator
-from PIL import Image
 import io
-from base64 import b64encode
 from dotenv import load_dotenv
 import os
 
@@ -31,18 +29,20 @@ def index():
 def result():
     if request.method == 'POST':
         album_link = request.form["album_input"]
+        width = 3300 if 'width' not in request.form else int(request.form["width"])
+        height = 5100 if 'height' not in request.form else int(request.form["height"])
 
         # check that input is not empty
-        if album_link == "":
+        if album_link == "" or album_link is None:
             return render_template('mainpage.html', warning_notification='Input field cannot be empty')
 
         # generate poster
-        poster, album_name = generator(album_link, (3300, 5100))
+        poster, album_name = generator(album_link, (width, height))
 
         # check that album data was fetched
         if poster is None or album_name is None:
             return render_template('mainpage.html', warning_notification=f'Failed to get album data based on input "{album_link}"')
-        
+
         poster_bytes = io.BytesIO()
         poster.save(poster_bytes, "png")
         poster_bytes.seek(0)
@@ -53,6 +53,10 @@ def result():
             download_name="{}_poster.jpg".format(album_name),
             as_attachment=True
         )
+
+    else:
+        # redirect to home screen if result page is called in browser
+        return redirect('/')
 
 
 if __name__ == '__main__':

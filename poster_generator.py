@@ -8,13 +8,9 @@
     You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>.
 """
 
-import numpy as np
-from PIL import Image, ImageFont, ImageDraw
+from PIL import ImageFont, ImageDraw
 from skimage import io
 from utils import *
-import langid
-import sys
-import shutil
 import os
 
 # gets path of current script
@@ -34,6 +30,7 @@ fonts = {'NotoSansJP-Bold.ttf':"",
 # assigns absolute path to each font
 for font in fonts.keys():
     fonts[font] = os.path.join(FONTDIR, font)
+
 
 # takes the langid language classification and text type and returns appropriate font path
 def get_font_by_lang(langid_classify, text_type):
@@ -75,15 +72,16 @@ def generator(album, resolution) -> ImageDraw:
     #
     album_art = io.imread(data['album_art'])
     album_art = Image.fromarray(album_art)
-    album_art = album_art.resize((resolution[0]-(spacing*2), resolution[0]-(spacing*2)))  # size is poster width - spacing from both sides (square)
+    album_art_size = min(resolution[0] - 2 * spacing, int((resolution[1] - 2 * spacing) * 0.6))  # full width but no larger than 60% of height
+    album_art = album_art.resize((album_art_size, album_art_size))
 
     mask = np.zeros(album_art.size, np.uint8)
     mask = rounded_rectangle(mask, (0,0), album_art.size, 0.1, color=(255,255,255), thickness=-1)
     mask = Image.fromarray(mask)
 
-    poster.paste(album_art, (spacing, spacing), mask)
+    poster.paste(album_art, (int(0.5 * resolution[0] - 0.5 * album_art_size), spacing), mask)
 
-    y_position += resolution[0] + spacing
+    y_position += album_art_size + 2 * spacing
 
     #
     # make the poster drawable
@@ -109,8 +107,8 @@ def generator(album, resolution) -> ImageDraw:
     #
     # album name
     #
-    max_text_length = int((resolution[0] - 2 * spacing) * 0.5)  # 50% of width is maximum
-    album_font_size = int(max_text_length / 18)  # constant 18 calculated based on width of 3300 and font size 80
+    max_text_length = int((resolution[0] - 2 * spacing) * 0.75)  # 75% of width is maximum
+    album_font_size = int(max_text_length / 27)  # constant 27 calculated based on width of 3300 and font size 80
     album_font = ImageFont.truetype(get_font_by_lang(data['album_name'][1], "thin"), album_font_size)
 
     text_length = album_font.getlength(data['album_name'][0])
@@ -166,7 +164,6 @@ def generator(album, resolution) -> ImageDraw:
     #
     code_size = max(round(resolution[1] / 5), 256)  # absolute width of requested spotify code
     spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/FFFFFF/black/{code_size}/spotify:album:{data["album_id"]}'
-    print(spotify_code_url)
     spotify_code = image_from_url(spotify_code_url)
 
     if spotify_code is not None:

@@ -34,7 +34,10 @@ def spotify_data_pull(album):
     if album_url_base not in album:
         return None
 
-    album = album[:album.find('?')]
+    # remove query parameters if present
+    if '?' in album:
+        album = album[:album.find('?')]
+
     id = album[album.find(album_url_base)+len(album_url_base):]
 
     auth_response = requests.post(AUTH_URL, {

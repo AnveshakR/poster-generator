@@ -4,6 +4,7 @@
         <title>Poster Generator</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
         <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
         <meta charset="UTF-8">
     </head>
@@ -13,9 +14,12 @@
             <h1>Spotify Poster Generator</h1>
         </div>
 
-        <form class="form-group container" method="POST" action="/result" autocomplete="off" onsubmit="removeNotification()">
+        <form id="form" class="form-group container" method="POST" action="/result" autocomplete="off" onsubmit="removeNotification()">
             <input class="form-control input-field" type="text" id="album_link" name="album_input" placeholder="Enter Spotify Album Link">
             <input class="form-control btn btn-outline-light submit-button" type="submit" value="Submit">
+
+            <input type="hidden" id="hidden_width_input" name="width">
+            <input type="hidden" id="hidden_height_input" name="height">
         </form>
 
         {% if warning_notification %}
@@ -24,12 +28,82 @@
             </div>
         {% endif %}
 
+        <div id="accordion" class="card">
+            <div class="card-header" id="heading">
+                <button class="btn" data-bs-toggle="collapse" data-bs-target="#collapse_advanced_options" aria-expanded="true" aria-controls="collapseAdvancedOptions">
+                    Advanced options
+                </button>
+            </div>
+            <div id="collapse_advanced_options" class="collapse" aria-labelledby="heading" data-bs-parent="#accordion">
+                <div class="card-body" style="text-align: start">
+                    <div class="d-inline-flex align-items-baseline pb-2">
+                        <label for="select_format" class="pe-2"><b>Format:</b></label>
+                        <select id="select_format" class="form-select" aria-label="Default select example" onload="setSizeInput()" onchange="setSizeInput()">
+                            <option value="2480,3508">A4 (300 ppi)</option>
+                            <option value="1240,1754" selected>A4 (150 ppi)</option>
+                            <option value="2551,3295">US Letter (300 ppi)</option>
+                            <option value="1276,1648">US Letter (150 ppi)</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+
+                    <div class="d-inline-flex align-items-baseline">
+                        <label for="width_input" class="pe-2"><b>Size:</b></label>
+                        <div class="input-group mb-3">
+                            <input id="width_input" class="form-control" aria-label="Width in pixel" readonly type="number">
+                            <div class="input-group-append">
+                                <span class="input-group-text">px</span>
+                            </div>
+                        </div>
+                        <p class="ps-2 pe-2">X</p>
+                        <div class="input-group mb-3">
+                            <input id="height_input" class="form-control" aria-label="Height in pixel" readonly type="number">
+                            <div class="input-group-append">
+                                <span class="input-group-text">px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
             function removeNotification() {
                 const notificationElement = document.getElementById('notification');
                 if (notificationElement)
                     notificationElement.remove();
             }
+
+            function setSizeInput() {
+                const selectedValue = document.getElementById('select_format').value;
+                if (selectedValue === 'custom') {
+                    document.getElementById('width_input').readOnly = false;
+                    document.getElementById('height_input').readOnly = false;
+                }
+                else {
+                    const size = selectedValue.split(',');
+                    document.getElementById('width_input').value = parseInt(size[0]);
+                    document.getElementById('width_input').readOnly = true;
+                    document.getElementById('height_input').value = parseInt(size[1]);
+                    document.getElementById('height_input').readOnly = true;
+                }
+            }
+
+            setSizeInput() // trigger on load
+
+            document.getElementById('form').addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                // Get values from the external input fields
+                const width = document.getElementById('width_input').value;
+                const height = document.getElementById('height_input').value;
+
+                // Update the values of the hidden input fields
+                document.getElementById('hidden_width_input').value = parseInt(width);
+                document.getElementById('hidden_height_input').value = parseInt(height);
+
+                document.getElementById('form').submit();
+            });
         </script>
     </body>
 </html>

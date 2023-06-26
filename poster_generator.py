@@ -17,10 +17,13 @@ import sys
 import shutil
 import os
 
+# gets path of current script
 MAINPATH = os.path.dirname(os.path.realpath(__file__))
 
+# adds font directory to path
 FONTDIR = os.path.join(MAINPATH, 'fonts')
 
+# list of fonts that will be used
 fonts = {'NotoSansJP-Bold.ttf':"", 
          'NotoSansJP-Thin.ttf':"", 
          'open-sans.bold.ttf':"", 
@@ -28,9 +31,11 @@ fonts = {'NotoSansJP-Bold.ttf':"",
          'NotoSansTC-Thin.otf': "",
          'NotoSansTC-Bold.otf': ""}
 
+# assigns absolute path to each font
 for font in fonts.keys():
     fonts[font] = os.path.join(FONTDIR, font)
-    
+ 
+# takes the langid language classification and text type and returns appropriate font path    
 def get_font_by_lang(langid_classify, text_type):
     
     if text_type == "bold":

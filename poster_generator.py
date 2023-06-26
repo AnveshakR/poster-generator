@@ -24,20 +24,20 @@ MAINPATH = os.path.dirname(os.path.realpath(__file__))
 FONTDIR = os.path.join(MAINPATH, 'fonts')
 
 # list of fonts that will be used
-fonts = {'NotoSansJP-Bold.ttf':"", 
-         'NotoSansJP-Thin.ttf':"", 
-         'open-sans.bold.ttf':"", 
-         'source-code-pro.light.ttf':"", 
+fonts = {'NotoSansJP-Bold.ttf':"",
+         'NotoSansJP-Thin.ttf':"",
+         'open-sans.bold.ttf':"",
+         'source-code-pro.light.ttf':"",
          'NotoSansTC-Thin.otf': "",
          'NotoSansTC-Bold.otf': ""}
 
 # assigns absolute path to each font
 for font in fonts.keys():
     fonts[font] = os.path.join(FONTDIR, font)
- 
-# takes the langid language classification and text type and returns appropriate font path    
+
+# takes the langid language classification and text type and returns appropriate font path
 def get_font_by_lang(langid_classify, text_type):
-    
+
     if text_type == "bold":
         if langid_classify[0] == 'ja':
             return fonts['NotoSansJP-Bold.ttf']
@@ -62,16 +62,20 @@ def generator(album, resolution) -> ImageDraw:
     if data is None:
         return None, None
 
-    spacing = 100
+    spacing = int(resolution[0] * 0.03)
     y_position = 0
 
+    #
     # define poster
+    #
     poster = Image.new('RGBA', resolution, color=(255,255,255,255))
 
+    #
     # album art
+    #
     album_art = io.imread(data['album_art'])
     album_art = Image.fromarray(album_art)
-    album_art = album_art.resize((resolution[0]-200, resolution[0]-200))
+    album_art = album_art.resize((resolution[0]-(spacing*2), resolution[0]-(spacing*2)))  # size is poster width - spacing from both sides (square)
 
     mask = np.zeros(album_art.size, np.uint8)
     mask = rounded_rectangle(mask, (0,0), album_art.size, 0.1, color=(255,255,255), thickness=-1)
@@ -81,83 +85,107 @@ def generator(album, resolution) -> ImageDraw:
 
     y_position += resolution[0] + spacing
 
+    #
     # make the poster drawable
+    #
     poster_draw = ImageDraw.Draw(poster, 'RGBA')
 
+    #
     # album artist
-    for i in range(200, 1, -5):
-        bold_font = ImageFont.truetype(get_font_by_lang(data['album_artist'][1], "bold"), i)
-            
-        text_size = bold_font.getlength(data['album_artist'][0])
-        if text_size < (resolution[0]-200)/2:
-            break
+    #
+    max_text_length = int((resolution[0] - 2 * spacing) * 0.65)  # 65% of width is maximum
+    artist_font_size = int(max_text_length / 9)  # constant 9 calculated based on width of 3300 and font size 170
+    artist_font = ImageFont.truetype(get_font_by_lang(data['album_artist'][1], "bold"), artist_font_size)
 
-    poster_draw.text((100, y_position), data['album_artist'][0],(0,0,0), font=bold_font)
+    text_length = artist_font.getlength(data['album_artist'][0])
+    if text_length > max_text_length:
+        reduce_factor = max_text_length / text_length  # calculate factor to get precise font size if too large
+        artist_font = ImageFont.truetype(get_font_by_lang(data['album_artist'][1], "bold"), int(artist_font_size * reduce_factor))
 
-    y_position += bold_font.getbbox(data['album_artist'][0])[3] + spacing
+    poster_draw.text((spacing, y_position), data['album_artist'][0],(0,0,0), font=artist_font)
 
+    y_position += artist_font.getbbox(data['album_artist'][0])[3] + spacing
+
+    #
     # album name
-    thin_font_size = 0
-    for i in range(100, 1, -5):
-        thin_font = ImageFont.truetype(get_font_by_lang(data['album_name'][1], "thin"), i)
-        text_size = thin_font.getlength(data['album_name'][0])
-        if text_size <= (resolution[0]-2*spacing)/2:
-            thin_font_size = i
-            break
+    #
+    max_text_length = int((resolution[0] - 2 * spacing) * 0.5)  # 50% of width is maximum
+    album_font_size = int(max_text_length / 18)  # constant 18 calculated based on width of 3300 and font size 80
+    album_font = ImageFont.truetype(get_font_by_lang(data['album_name'][1], "thin"), album_font_size)
 
-    poster_draw.text((spacing, y_position), data['album_name'][0], (0,0,0), font=thin_font)
+    text_length = album_font.getlength(data['album_name'][0])
+    if text_length > max_text_length:
+        reduce_factor = max_text_length / text_length  # calculate factor to get precise font size if too large
+        album_font = ImageFont.truetype(get_font_by_lang(data['album_name'][1], "thin"), int(album_font_size * reduce_factor))
 
+    poster_draw.text((spacing, y_position), data['album_name'][0], (0,0,0), font=album_font)
+
+    #
     # playtime
-    thin_font = ImageFont.truetype(fonts['source-code-pro.light.ttf'], thin_font_size//2)
-    poster_draw.text((resolution[0] - spacing - thin_font.getbbox(data['playtime'])[2], y_position), data['playtime'], (0,0,0), font=thin_font)
+    #
+    playtime_font_size = int(album_font_size//1.5)
+    playtime_font = ImageFont.truetype(fonts['source-code-pro.light.ttf'], playtime_font_size)
+    poster_draw.text((resolution[0] - spacing - playtime_font.getbbox(data['playtime'])[2], y_position), data['playtime'], (0,0,0), font=playtime_font)
 
     y_position += 2*spacing
 
+    #
     # color palette
+    #
     palette = dominant_colors(np.array(album_art))
 
     x_posn = spacing
+    line_height = resolution[1] * 0.01
     for color in palette:
-        poster_draw.rectangle([x_posn, y_position, x_posn+(resolution[0] - 2*spacing)/len(palette), y_position+50], fill=tuple(color), width=50)
+        poster_draw.rectangle([x_posn, y_position, x_posn+(resolution[0] - 2*spacing)/len(palette), y_position+line_height], fill=tuple(color), width=50)
         x_posn += (resolution[0] - 2*spacing)/len(palette)
 
     y_position += spacing
 
+    #
     # tracks
-    thin_font = ImageFont.truetype(fonts['NotoSansJP-Thin.ttf'], thin_font_size)
+    #
+    track_font_size = album_font_size
+    track_font = ImageFont.truetype(fonts['NotoSansJP-Thin.ttf'], track_font_size)
     track_line = ""
     for track in data['tracks']:
-        if thin_font.getlength(track_line) < resolution[0] - spacing:
+        if track_font.getlength(track_line) < resolution[0] - spacing:
             track_line = track_line + track + " | "
 
-        if thin_font.getlength(track_line) >= resolution[0] - spacing:
+        if track_font.getlength(track_line) >= resolution[0] - spacing:
             track_line = track_line[:len(track_line) - len(track + " | ")]
-            poster_draw.text((spacing, y_position), track_line, (0,0,0), font=thin_font)
+            poster_draw.text((spacing, y_position), track_line, (0,0,0), font=track_font)
             track_line = track + " | "
-            y_position += thin_font.getbbox(track_line)[3]
+            y_position += track_font.getbbox(track_line)[3]
 
-    poster_draw.text((spacing, y_position), track_line, (0,0,0), font=thin_font)
+    poster_draw.text((spacing, y_position), track_line, (0,0,0), font=track_font)
 
+    #
     # spotify scan code
-    size = round(resolution[1] / 5)  # absolute width of requested spotify code
-    spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/FFFFFF/black/{size}/spotify:album:{data["album_id"]}'
+    #
+    code_size = max(round(resolution[1] / 5), 256)  # absolute width of requested spotify code
+    spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/FFFFFF/black/{code_size}/spotify:album:{data["album_id"]}'
+    print(spotify_code_url)
     spotify_code = image_from_url(spotify_code_url)
 
     if spotify_code is not None:
-        scale = 0.16  # relative width of displayed spotify code
-        space_from_sides = int(resolution[0] * 0.015)  # amount of added padding
-        code_dimensions = (int(resolution[0] * scale), int(resolution[0] * scale / 4))
-        code_position = (resolution[0] - code_dimensions[0] * 2 - space_from_sides, resolution[1] - code_dimensions[1] * 2 - space_from_sides)
-        spotify_code.resize(code_dimensions)
+        code_scale = 0.16  # relative width of displayed spotify code
+        spotify_code.resize((int((resolution[0] - 2 * spacing) * code_scale), int((resolution[0] - 2 * spacing) * code_scale / 4)))
+        code_width, code_height = spotify_code.size
+        code_position = (resolution[0] - int(spacing/2) - code_width, resolution[1] - int(spacing/2) - code_height)
         poster.paste(spotify_code, code_position)
 
-    # record label
-    thin_font = ImageFont.truetype(get_font_by_lang(data['record'][1], "thin"), thin_font_size//2)
-    poster_draw.text((spacing, resolution[1] - spacing - 63), data['record'][0], (0,0,0), thin_font)
+    #
+    # record label and release date
+    #
+    label_font_size = playtime_font_size
+    label_font = ImageFont.truetype(get_font_by_lang(data['record'][1], "thin"), label_font_size)
+    label_offset = label_font.getbbox(data['release_date'])[3]  # offset to set label text over date text
+    poster_draw.text((spacing, resolution[1] - 1.5*spacing - label_offset), data['record'][0], (0,0,0), label_font)
 
-    # release date
-    poster_draw.text((spacing, resolution[1] - spacing), data['release_date'], (0,0,0), thin_font)
+    poster_draw.text((spacing, resolution[1] - 1.5*spacing), data['release_date'], (0,0,0), label_font)
 
+    # return final poster
     return poster, data['album_name'][0]
 
 

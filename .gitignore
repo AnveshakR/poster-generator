@@ -6,3 +6,4 @@ __pycache__/
 info.txt
 postergen-env
 .python-version
+!images/*.png

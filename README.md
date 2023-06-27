@@ -8,33 +8,10 @@ Enter a (valid) Spotify album URL, receive a poster!
 
 ## Examples!
 
-<style>
-  .image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-
-  .image-container img {
-    width: 90%;
-  }
-</style>
-
-<div class="image-container">
-  <div>
-    <a href="https://open.spotify.com/album/1VGVJdmvOSRK2w9RKXk18A?si=f9df2e562e854eb7">
-      <h3>Cyberpunk 2077 Radio, Vol 2</h3>
-    </a>
-    <img src="images/Cyberpunk_2077__Radio,_Vol._2_(Original_Soundtrack)_poster.png" alt="Image 1">
-  </div>
-  <div>
-    <a href="https://open.spotify.com/album/2oN5rPuojBnqH0uQMUMVAl?si=a5c84b40146e48d1">
-      <h2>カワキヲアメク</h2>
-    </a>
-    <img src="images/カワキヲアメク_poster.png" alt="Image 2">
-  </div>
-</div>
+<p float="center">
+  <img src="images/Cyberpunk_2077__Radio,_Vol._2_(Original_Soundtrack)_poster.png" width="49%" />
+  <img src="images/カワキヲアメク_poster.png" width="49%" /> 
+</p>
 
 ---
 

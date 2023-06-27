@@ -12,6 +12,7 @@ from PIL import ImageFont, ImageDraw
 from skimage import io
 from utils import *
 import os
+import re
 
 # gets path of current script
 MAINPATH = os.path.dirname(os.path.realpath(__file__))
@@ -183,8 +184,12 @@ def generator(album, resolution) -> ImageDraw:
 
     poster_draw.text((spacing, resolution[1] - 1.5*spacing), data['release_date'], (0,0,0), label_font)
 
-    # return final poster
-    return poster, data['album_name'][0]
+    # return final poster and filename friendly album name (no special characters)
+    invalid_chars = r"#%&{}\\<>*?\ $!'\":@+`|="
+    pattern = "[" + re.escape(invalid_chars) + "]"
+    filename_friendly_album_name = re.sub(pattern, "_", data['album_name'][0])
+    
+    return poster, filename_friendly_album_name
 
 
 if __name__ == '__main__':
@@ -195,11 +200,11 @@ if __name__ == '__main__':
         exit(1)
 
     resolution = input("Enter height, width in pixels: ")
+    
     if resolution == '':
         resolution = (3300, 5100)
     else:
-        resolution = list(map(int, resolution.strip().split(',')))
-        resolution.append(2)
+        resolution = tuple(map(int, resolution.strip().split(',')))
 
     poster, album_name = generator(album, resolution)
 

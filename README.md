@@ -1,6 +1,6 @@
 # Spotify Poster Generator
 
-https://poster-generator.up.railway.app/
+https://spotifyposters.live/
 
 Does what it says on the tin.
 

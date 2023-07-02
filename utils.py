@@ -72,6 +72,19 @@ def spotify_data_pull(album):
         tracks.append(i['name'])
 
     album_art = r['images'][0]['url']
+    
+    date_str = r['release_date'].replace('-', '')
+
+    # handle release date precision
+    if r['release_date_precision'] == 'day':
+        format_str = r'%Y%m%d'
+    elif r['release_date_precision'] == 'month':
+        format_str = r'%Y%m'
+    elif r['release_date_precision'] == 'year':
+        format_str = r'%Y'
+
+    release_date = datetime.datetime.strptime(date_str, format_str).strftime(r'%B %d, %Y')
+
 
     data = {}
 
@@ -79,7 +92,7 @@ def spotify_data_pull(album):
     data.update({'album_name': [r['name'], langid.classify(r['name'])]})
     data.update({'album_artist': [r['artists'][0]['name'], langid.classify(r['artists'][0]['name'])]})
     data.update({'record' : [r['label'], langid.classify(r['label'])]})
-    data.update({'release_date' : datetime.datetime.strptime(r['release_date'].replace('-',''), r'%Y%m%d').strftime(r'%B %d, %Y')})
+    data.update({'release_date' : release_date})
     data.update({'playtime' : playtime})
     data.update({'tracks' : tracks})
     data.update({'album_art': album_art})
@@ -138,17 +151,6 @@ def rounded_rectangle(src, top_left, bottom_right, radius=1, color=255, thicknes
     cv2.ellipse(src, (p4[0] + corner_radius, p4[1] - corner_radius), (corner_radius, corner_radius), 90.0, 0, 90,  color , thickness, line_type)
 
     return src
-
-
-def font_scale_finder(text, scale, limit, thickness):
-    print(text)
-    for i in range(200, 50, -5):
-        i = i/100
-        textsize = cv2.getTextSize(text, cv2.FONT_HERSHEY_TRIPLEX, i*scale, thickness*scale)
-        print(textsize[0][0])
-        if textsize[0][0] <= limit*scale:
-            return i
-
 
 def dominant_colors(image):
 

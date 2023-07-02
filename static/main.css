@@ -27,3 +27,12 @@ form {
 .submit-button {
     width: 30%;
 }
+
+.github-logo {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}

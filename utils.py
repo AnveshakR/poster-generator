@@ -22,12 +22,24 @@ import langid
 
 load_dotenv()
 
-
-def spotify_data_pull(album):
+def get_access_token():
     SPOTIFY_SECRET = os.getenv('SPOTIFY_SECRET')
     SPOTIFY_ID = os.getenv('SPOTIFY_ID')
-    album_url_base = r'https://open.spotify.com/album/'
     AUTH_URL = r'https://accounts.spotify.com/api/token'
+
+    auth_response = requests.post(AUTH_URL, {
+        'grant_type': 'client_credentials',
+        'client_id': SPOTIFY_ID,
+        'client_secret': SPOTIFY_SECRET,
+    }).json()
+    
+    access_token = auth_response['access_token']
+    
+    return access_token
+
+
+def spotify_data_pull(album):
+    album_url_base = r'https://open.spotify.com/album/'
     album_get = 'https://api.spotify.com/v1/albums/{id}'
 
     # check format of album url
@@ -40,16 +52,10 @@ def spotify_data_pull(album):
 
     id = album[album.find(album_url_base)+len(album_url_base):]
 
-    auth_response = requests.post(AUTH_URL, {
-        'grant_type': 'client_credentials',
-        'client_id': SPOTIFY_ID,
-        'client_secret': SPOTIFY_SECRET,
-    })
-
-    auth_response_data = auth_response.json()
-    access_token = auth_response_data['access_token']
+    access_token = get_access_token()
+    
     headers = {
-        'Authorization': 'Bearer {token}'.format(token=access_token)
+        'Authorization': 'Bearer ' + access_token
     }
 
     r = requests.get(album_get.format(id=id), headers=headers)

@@ -9,3 +9,5 @@ postergen-env
 .python-version
 !images/*.png
 !static/*.png
+./poster
+poster/

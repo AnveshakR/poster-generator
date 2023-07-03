@@ -15,12 +15,17 @@
         </div>
 
         <form id="form" class="form-group container" method="POST" action="/result" autocomplete="off" onsubmit="removeNotification()">
-            <input class="form-control input-field" type="text" id="album_link" name="album_input" placeholder="Enter Spotify Album Link">
+            <input class="form-control input-field" type="text" id="album_link" name="album_input" placeholder="Enter Spotify Album Link" onChange="updateSearchResults('{{ access_token }}')">
             <input class="form-control btn btn-outline-light submit-button" type="submit" value="Submit">
 
             <input type="hidden" id="hidden_width_input" name="width">
             <input type="hidden" id="hidden_height_input" name="height">
         </form>
+        <div class="search-results" id="searchResultsDiv" style="width: 500px; height: 0; overflow: scroll; background-color: aliceblue; color: black; margin-bottom: 20px; border-radius: 5px;">
+            <ul class="search-results-list" style="list-style-type: none;">
+            </ul>
+        </div>
+
 
         {% if warning_notification %}
             <div id="notification" class="alert alert-warning" role="alert">
@@ -72,6 +77,86 @@
         </a>        
 
         <script>
+
+            //Returns the same variable, useful for passing variables from Flask to JS
+            function getVariable(variable) {
+                return variable;
+            }
+
+            // Search for albums when the user types in the album link
+            function updateSearchResults(access_token) {
+                const searchQuery = document.getElementById('album_link').value;
+                const searchResultsList = document.getElementsByClassName('search-results-list')[0];
+                const searchResults = document.getElementsByClassName('search-result');
+                const searchResultsDiv = document.getElementById('searchResultsDiv');
+
+                // Remove all previous search results
+                while (searchResults.length > 0) {
+                    searchResults[0].remove();
+                }
+
+                // If the album link is empty, don't show any search results
+                if (searchQuery === '') {
+                    searchResultsList.style.display = 'none';
+                    searchResultsDiv.style.height = '0px';
+                    return;
+                }
+
+                searchResultsDiv.style.height = '400px';
+
+                // Get access tokens
+                
+
+                // Create an HTML request
+                const request = new XMLHttpRequest();
+                const headers = {
+                                'Authorization': 'Bearer ' + access_token
+                                }
+
+                const url = 'https://api.spotify.com/v1/search?q=' + searchQuery + '&type=album'
+
+                // Send the json request with url and headers
+                request.open('GET', url, true);
+
+                for (const header in headers) {
+                    request.setRequestHeader(header, headers[header]);
+                }
+
+                request.send();
+
+                // When the request is loaded, parse the response
+
+                request.onload = function() {
+                    const response = JSON.parse(this.response);
+                    const albums = response.albums.items;
+
+                    // If there are no albums, don't show any search results
+                    if (albums.length === 0) {
+                        searchResultsList.style.display = 'none';
+                        return;
+                    }
+
+                    // Show the search results
+                    searchResultsList.style.display = 'block';
+
+                    // Create a search result for each album
+                    for (const album of albums) {
+                        const searchResult = document.createElement('li');
+                        searchResult.className = 'search-result';
+                        searchResult.innerHTML = album.name;
+                        searchResultsList.appendChild(searchResult);
+                        // Set an onclick function for each search result
+                        searchResult.onclick = function() {
+                            document.getElementById('album_link').value = album.external_urls.spotify;
+                            searchResultsList.style.display = 'none';
+                            searchResultsDiv.style.height = '0px';
+                        }
+                    }
+                }
+
+            }
+
+
             function removeNotification() {
                 const notificationElement = document.getElementById('notification');
                 if (notificationElement)

@@ -10,6 +10,7 @@
 
 from flask import Flask, render_template, request, send_file, redirect
 from poster_generator import generator
+from utils import get_access_token
 import io
 from dotenv import load_dotenv
 import os
@@ -22,7 +23,8 @@ app.config["SECRET_KEY"]=os.getenv('FLASK_SECRET')
 
 @app.route('/')
 def index():
-    return render_template('mainpage.html')
+    access_token = get_access_token()
+    return render_template('mainpage.html', access_token=access_token)
 
 
 @app.route('/result', methods = ['POST', 'GET'])

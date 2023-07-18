@@ -32,7 +32,4 @@ To run this for yourself locally, you'll need a .env file with the following val
 
 ---
 Big thanks to @sudmike for contributing to the repository and coming up with ideas!
-
----
----
-The website probably wont be up all the time, just email me if you need one.
+> The website probably wont be up all the time, just email me if you need one.

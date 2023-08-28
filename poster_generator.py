@@ -52,7 +52,7 @@ def get_font_by_lang(langid_classify, text_type):
             return fonts['source-code-pro.light.ttf']
 
 
-def generator(album, resolution) -> ImageDraw:
+def generator(album, resolution, theme) -> ImageDraw:
 
     data = spotify_data_pull(album)
 
@@ -64,9 +64,19 @@ def generator(album, resolution) -> ImageDraw:
     y_position = 0
 
     #
+    # define color scheme based on theme variable
+    #
+    if theme == "light":
+        background_color = (255, 255, 255, 255) # white background
+        text_color = (0, 0, 0) # black text
+    elif theme == "dark":
+        background_color = (10, 10, 10, 255) # dark background
+        text_color = (255, 255, 255) # white text
+
+    #
     # define poster
     #
-    poster = Image.new('RGBA', resolution, color=(255,255,255,255))
+    poster = Image.new('RGBA', resolution, color=background_color)
 
     #
     # album art
@@ -101,7 +111,7 @@ def generator(album, resolution) -> ImageDraw:
         reduce_factor = max_text_length / text_length  # calculate factor to get precise font size if too large
         artist_font = ImageFont.truetype(get_font_by_lang(data['album_artist'][1], "bold"), int(artist_font_size * reduce_factor))
 
-    poster_draw.text((spacing, y_position), data['album_artist'][0],(0,0,0), font=artist_font)
+    poster_draw.text((spacing, y_position), data['album_artist'][0],text_color, font=artist_font)
 
     y_position += artist_font.getbbox(data['album_artist'][0])[3] + spacing
 
@@ -117,7 +127,7 @@ def generator(album, resolution) -> ImageDraw:
         reduce_factor = max_text_length / text_length  # calculate factor to get precise font size if too large
         album_font = ImageFont.truetype(get_font_by_lang(data['album_name'][1], "thin"), int(album_font_size * reduce_factor))
 
-    poster_draw.text((spacing, y_position), data['album_name'][0], (0,0,0), font=album_font)
+    poster_draw.text((spacing, y_position), data['album_name'][0], text_color, font=album_font)
 
     #
     # playtime
@@ -125,7 +135,7 @@ def generator(album, resolution) -> ImageDraw:
     playtime_font_size = int(album_font_size//1.5)
     playtime_font = ImageFont.truetype(fonts['source-code-pro.light.ttf'], playtime_font_size)
     playtime_y_position = y_position + int(artist_font.size/2.25) - playtime_font.size  # align playtime with bottom of album name instead of top
-    poster_draw.text((resolution[0] - spacing - playtime_font.getbbox(data['playtime'])[2], playtime_y_position), data['playtime'], (0,0,0), font=playtime_font)
+    poster_draw.text((resolution[0] - spacing - playtime_font.getbbox(data['playtime'])[2], playtime_y_position), data['playtime'], text_color, font=playtime_font)
 
     y_position += 2*spacing
 
@@ -154,17 +164,20 @@ def generator(album, resolution) -> ImageDraw:
 
         if track_font.getlength(track_line) >= resolution[0] - spacing:
             track_line = track_line[:len(track_line) - len(track + " | ")]
-            poster_draw.text((spacing, y_position), track_line, (0,0,0), font=track_font)
+            poster_draw.text((spacing, y_position), track_line, text_color, font=track_font)
             track_line = track + " | "
             y_position += track_font.getbbox(track_line)[3]
 
-    poster_draw.text((spacing, y_position), track_line, (0,0,0), font=track_font)
+    poster_draw.text((spacing, y_position), track_line, text_color, font=track_font)
 
     #
     # spotify scan code
     #
     code_size = max(round(resolution[1] / 5), 256)  # absolute width of requested spotify code
-    spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/FFFFFF/black/{code_size}/spotify:album:{data["album_id"]}'
+    if theme == 'light':
+        spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/FFFFFF/black/{code_size}/spotify:album:{data["album_id"]}'
+    elif theme == 'dark':
+        spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/000000/white/{code_size}/spotify:album:{data["album_id"]}'
     spotify_code = image_from_url(spotify_code_url)
 
     if spotify_code is not None:
@@ -180,9 +193,9 @@ def generator(album, resolution) -> ImageDraw:
     label_font_size = playtime_font_size
     label_font = ImageFont.truetype(get_font_by_lang(data['record'][1], "thin"), label_font_size)
     label_offset = label_font.getbbox(data['release_date'])[3]  # offset to set label text over date text
-    poster_draw.text((spacing, resolution[1] - 1.5*spacing - label_offset), data['record'][0], (0,0,0), label_font)
+    poster_draw.text((spacing, resolution[1] - 1.5*spacing - label_offset), data['record'][0], text_color, label_font)
 
-    poster_draw.text((spacing, resolution[1] - 1.5*spacing), data['release_date'], (0,0,0), label_font)
+    poster_draw.text((spacing, resolution[1] - 1.5*spacing), data['release_date'], text_color, label_font)
 
     # return final poster and filename friendly album name (no special characters)
     invalid_chars = r"#%&{}\\<>*?\ $!'\":@+`|="
@@ -199,6 +212,8 @@ if __name__ == '__main__':
         print("Enter valid Spotify album link.")
         exit(1)
 
+    theme = "light"
+
     resolution = input("Enter height, width in pixels: ")
     
     if resolution == '':
@@ -206,8 +221,8 @@ if __name__ == '__main__':
     else:
         resolution = tuple(map(int, resolution.strip().split(',')))
 
-    poster, album_name = generator(album, resolution)
+    poster, album_name = generator(album, resolution, theme)
 
-    poster.save(f"{album_name}_poster.png")
+    poster.save(f"{album_name}_{theme}_poster.png")
 
     poster.show()

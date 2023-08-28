@@ -41,9 +41,12 @@ def result():
             return render_template('mainpage.html', warning_notification='Width must be at least 300px and height must be at least 450px')
         if height < width * 1.25 or height > width * 2:  # height must be between 30% and 100% larger than width
             return render_template('mainpage.html', warning_notification='Height must be between 25% and 100% larger than width')
+        
+        # get color theme of poster
+        theme = request.form["theme"]
 
         # generate poster
-        poster, album_name = generator(album_link, (width, height))
+        poster, album_name = generator(album_link, (width, height), theme)
 
         # check that album data was fetched
         if poster is None or album_name is None:
@@ -56,7 +59,7 @@ def result():
         return send_file(
             poster_bytes,
             mimetype='image/png',
-            download_name="{}_poster.jpg".format(album_name),
+            download_name=f"{album_name}_{theme}_poster.jpg",
             as_attachment=True
         )
 

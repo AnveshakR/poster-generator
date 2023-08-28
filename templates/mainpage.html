@@ -20,6 +20,8 @@
 
             <input type="hidden" id="hidden_width_input" name="width">
             <input type="hidden" id="hidden_height_input" name="height">
+
+            <input type="hidden" id="poster_theme_input" name="theme">
         </form>
 
         {% if warning_notification %}
@@ -63,6 +65,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="d-inline-flex align-items-baseline">
+                        <label for="poster_theme" class="pe-2"><b>Theme:</b></label>
+                        <label class="switch">
+                            <input type="checkbox", id="poster_theme_switch">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -105,6 +115,13 @@
                 // Update the values of the hidden input fields
                 document.getElementById('hidden_width_input').value = parseInt(width);
                 document.getElementById('hidden_height_input').value = parseInt(height);
+
+                // Get the state of the poster theme switch
+                const posterThemeSwitch = document.getElementById('poster_theme_switch');
+                const posterThemeValue = posterThemeSwitch.checked ? 'dark' : 'light';
+
+                // Set the value of the poster theme input field
+                document.getElementById('poster_theme_input').value = posterThemeValue;
 
                 document.getElementById('form').submit();
             });

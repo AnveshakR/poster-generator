@@ -13,12 +13,16 @@ from skimage import io
 from utils import *
 import os
 import re
+from download_fonts import download_fonts
 
 # gets path of current script
 MAINPATH = os.path.dirname(os.path.realpath(__file__))
 
 # adds font directory to path
 FONTDIR = os.path.join(MAINPATH, 'fonts')
+
+if not os.path.exists(FONTDIR):
+    download_fonts()
 
 # list of fonts that will be used
 fonts = {'NotoSansJP-Bold.ttf':"",
@@ -212,14 +216,17 @@ if __name__ == '__main__':
         print("Enter valid Spotify album link.")
         exit(1)
 
-    theme = "light"
-
     resolution = input("Enter height, width in pixels: ")
+
+    theme = input("Enter theme (light/dark): ")
     
     if resolution == '':
         resolution = (3300, 5100)
     else:
         resolution = tuple(map(int, resolution.strip().split(',')))
+
+    if theme == '':
+        theme = 'light'
 
     poster, album_name = generator(album, resolution, theme)
 

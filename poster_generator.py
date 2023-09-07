@@ -22,7 +22,7 @@ MAINPATH = os.path.dirname(os.path.realpath(__file__))
 FONTDIR = os.path.join(MAINPATH, 'fonts')
 
 if not os.path.exists(FONTDIR):
-    download_fonts()
+    download_fonts(FONTDIR)
 
 # list of fonts that will be used
 fonts = {'NotoSansJP-Bold.ttf':"",

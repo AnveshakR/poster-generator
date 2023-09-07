@@ -1,9 +1,8 @@
 import os
 
-def download_fonts():
+def download_fonts(output_directory):
     # Define the input text file and output directory
     input_file = 'fontlinks.txt'
-    output_directory = 'fonts/'
 
     # Create the output directory if it doesn't exist
     os.makedirs(output_directory, exist_ok=True)

@@ -9,8 +9,8 @@ Enter a (valid) Spotify album URL, receive a poster!
 ## Examples!
 
 <p float="center">
-  <img src="images/Cyberpunk_2077__Radio,_Vol._2_(Original_Soundtrack)_poster.png" width="49%" />
-  <img src="images/カワキヲアメク_poster.png" width="49%" /> 
+  <img src="images/Honestly,_Nevermind_dark_poster.png" width="49%" />
+  <img src="images/結束バンド_light_poster.png" width="49%" /> 
 </p>
 
 ---

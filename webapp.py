@@ -13,6 +13,8 @@ from poster_generator import generator
 import io
 from dotenv import load_dotenv
 import os
+import re
+import requests
 
 load_dotenv()
 
@@ -44,6 +46,17 @@ def result():
         
         # get color theme of poster
         theme = request.form["theme"]
+
+        if re.match(r'https://spotify.link/([a-zA-Z0-9]+)', album_link):
+            album_link = requests.get(album_link).url
+
+        patterns = [
+            (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)'),
+            (r'^spotify:album:([a-zA-Z0-9]+)'),
+            ]
+    
+        if not any(re.match(pattern, album_link) for pattern in patterns):
+            return render_template('mainpage.html', warning_notification='Invalid album link')
 
         # generate poster
         poster, album_name = generator(album_link, (width, height), theme)

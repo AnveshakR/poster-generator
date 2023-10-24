@@ -14,6 +14,8 @@ from utils import *
 import os
 import re
 from download_fonts import download_fonts
+import requests
+import re
 
 # gets path of current script
 MAINPATH = os.path.dirname(os.path.realpath(__file__))
@@ -216,9 +218,18 @@ def generator(album, resolution, theme) -> ImageDraw:
 if __name__ == '__main__':
 
     album = input("Enter Spotify Album link: ")
-    if album.find('https://open.spotify.com/album/') == -1:
-        print("Enter valid Spotify album link.")
-        exit(1)
+
+    if re.match(r'https://spotify.link/([a-zA-Z0-9]+)', album):
+        album = requests.get(album).url
+
+    patterns = [
+        (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)'),
+        (r'^spotify:album:([a-zA-Z0-9]+)'),
+        ]
+    
+    if not any(re.match(pattern, album) for pattern in patterns):
+        print("Invalid Spotify Album link")
+        exit()
 
     resolution = input("Enter height, width in pixels: ")
 

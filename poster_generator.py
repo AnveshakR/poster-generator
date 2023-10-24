@@ -29,8 +29,8 @@ fonts = {'NotoSansJP-Bold.ttf':"",
          'NotoSansJP-Thin.ttf':"",
          'open-sans.bold.ttf':"",
          'source-code-pro.light.ttf':"",
-         'NotoSansTC-Thin.otf': "",
-         'NotoSansTC-Bold.otf': ""}
+         'NotoSansTC-Thin.ttf': "",
+         'NotoSansTC-Bold.ttf': ""}
 
 # assigns absolute path to each font
 for font in fonts.keys():
@@ -44,14 +44,14 @@ def get_font_by_lang(langid_classify, text_type):
         if langid_classify[0] == 'ja':
             return fonts['NotoSansJP-Bold.ttf']
         elif langid_classify[0] == 'zh':
-            return fonts['NotoSansTC-Bold.otf']
+            return fonts['NotoSansTC-Bold.ttf']
         else:
             return fonts['open-sans.bold.ttf']
     elif text_type == "thin":
         if langid_classify[0] == 'ja':
             return fonts['NotoSansJP-Thin.ttf']
         elif langid_classify[0] == 'zh':
-            return fonts['NotoSansTC-Thin.otf']
+            return fonts['NotoSansTC-Thin.ttf']
         else:
             return fonts['source-code-pro.light.ttf']
 
@@ -181,7 +181,7 @@ def generator(album, resolution, theme) -> ImageDraw:
     if theme == 'light':
         spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/FFFFFF/black/{code_size}/spotify:album:{data["album_id"]}'
     elif theme == 'dark':
-        spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/000000/white/{code_size}/spotify:album:{data["album_id"]}'
+        spotify_code_url = f'https://scannables.scdn.co/uri/plain/jpeg/101010/white/{code_size}/spotify:album:{data["album_id"]}'
     spotify_code = image_from_url(spotify_code_url)
 
     if spotify_code is not None:
@@ -189,6 +189,10 @@ def generator(album, resolution, theme) -> ImageDraw:
         spotify_code.resize((int((resolution[0] - 2 * spacing) * code_scale), int((resolution[0] - 2 * spacing) * code_scale / 4)))
         code_width, code_height = spotify_code.size
         code_position = (resolution[0] - int(spacing/2) - code_width, resolution[1] - int(spacing/2) - code_height)
+        if theme == 'dark':
+            spotify_code_array = np.array(spotify_code)
+            spotify_code_array[spotify_code_array == 16] = 10
+            spotify_code = Image.fromarray(spotify_code_array)
         poster.paste(spotify_code, code_position)
 
     #

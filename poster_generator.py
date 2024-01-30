@@ -58,7 +58,7 @@ def get_font_by_lang(langid_classify, text_type):
             return fonts['source-code-pro.light.ttf']
 
 
-def generator(album, resolution, theme) -> ImageDraw:
+def generator(album, resolution, options) -> ImageDraw:
 
     data = spotify_data_pull(album)
 
@@ -72,6 +72,7 @@ def generator(album, resolution, theme) -> ImageDraw:
     #
     # define color scheme based on theme variable
     #
+    theme = options['theme']
     if theme == "light":
         background_color = (255, 255, 255, 255) # white background
         text_color = (0, 0, 0) # black text
@@ -165,6 +166,12 @@ def generator(album, resolution, theme) -> ImageDraw:
     track_font = ImageFont.truetype(fonts['NotoSansJP-Thin.ttf'], track_font_size)
     track_line = ""
     for track in data['tracks']:
+        if options['remove_featured_artists']:
+            # remove anything inside parentheses including the parentheses
+            track = re.sub(r'\([^)]*\)', '', track)
+            track = re.sub(r'\[[^)]*\]', '', track)
+            track = track.strip()
+
         if track_font.getlength(track_line) < resolution[0] - spacing:
             track_line = track_line + track + " | "
 

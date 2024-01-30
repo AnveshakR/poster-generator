@@ -44,8 +44,19 @@ def result():
         if height < width * 1.25 or height > width * 2:  # height must be between 30% and 100% larger than width
             return render_template('mainpage.html', warning_notification='Height must be between 25% and 100% larger than width')
         
+        # poster options
+        options = {}
+
         # get color theme of poster
         theme = request.form["theme"]
+        options['theme'] = theme
+
+        # check if featured artists are to be removed from track
+        remove_featured = request.form.get("remove_featured_artists")
+        if remove_featured == 'true':
+            options['remove_featured_artists'] = True
+        else:
+            options['remove_featured_artists'] = False
 
         if re.match(r'https://spotify.link/([a-zA-Z0-9]+)', album_link):
             album_link = requests.get(album_link).url
@@ -59,7 +70,7 @@ def result():
             return render_template('mainpage.html', warning_notification='Invalid album link')
 
         # generate poster
-        poster, album_name = generator(album_link, (width, height), theme)
+        poster, album_name = generator(album_link, (width, height), options)
 
         # check that album data was fetched
         if poster is None or album_name is None:

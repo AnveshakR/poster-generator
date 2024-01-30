@@ -22,6 +22,7 @@
             <input type="hidden" id="hidden_height_input" name="height">
 
             <input type="hidden" id="poster_theme_input" name="theme">
+            <input type="hidden" id="remove_featured_artists_input" name="remove_featured_artists">
         </form>
 
         {% if warning_notification %}
@@ -73,7 +74,14 @@
                             <span class="slider round"></span>
                         </label>
                     </div>
-                </div>
+
+                    <br><br>
+
+                    <div class="d-inline-flex align-items-baseline">
+                        <label for="remove_featured_artists" class="pe-2"><b>Remove featured artists (Experimental):</b></label>
+                        <input type="checkbox", id="remove_featured_artists_switch">
+                    </div>
+
             </div>
         </div>
 
@@ -106,7 +114,7 @@
             setSizeInput() // trigger on load
 
             document.getElementById('form').addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault(); // Prevent default form submissionW
 
                 // Get values from the external input fields
                 const width = document.getElementById('width_input').value;
@@ -120,8 +128,15 @@
                 const posterThemeSwitch = document.getElementById('poster_theme_switch');
                 const posterThemeValue = posterThemeSwitch.checked ? 'dark' : 'light';
 
+                // Get the state of the remove featured artists switch
+                const removeFeaturedArtistsSwitch = document.getElementById('remove_featured_artists_switch');
+                const removeFeaturedArtistsValue = removeFeaturedArtistsSwitch.checked ? true : false;
+
                 // Set the value of the poster theme input field
                 document.getElementById('poster_theme_input').value = posterThemeValue;
+
+                // Set the value of the remove featured artists input field
+                document.getElementById('remove_featured_artists_input').value = removeFeaturedArtistsValue;
 
                 document.getElementById('form').submit();
             });

@@ -81,14 +81,20 @@
                         <label for="remove_featured_artists" class="pe-2"><b>Remove featured artists (Experimental):</b></label>
                         <input type="checkbox", id="remove_featured_artists_switch">
                     </div>
-
+                </div> 
             </div>
         </div>
+
+        
 
         <a href="https://github.com/AnveshakR/poster-generator" target="_blank">
             <img src="/static/github-mark.png" alt="GitHub Logo" class="github-logo">
         </a>        
 
+        <a class="counterapi" ns={{ns}} key="{{key}}" style="min-height:44px" nolink="true"></a>
+
+        <script src="https://counterapi.com/c.js" async ></script>
+    
         <script>
             function removeNotification() {
                 const notificationElement = document.getElementById('notification');

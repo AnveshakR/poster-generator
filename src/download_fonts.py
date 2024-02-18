@@ -2,7 +2,7 @@ import os
 
 def download_fonts(output_directory):
     # Define the input text file and output directory
-    input_file = 'fontlinks.txt'
+    input_file = 'src/fontlinks.txt'
 
     # Create the output directory if it doesn't exist
     os.makedirs(output_directory, exist_ok=True)
@@ -22,7 +22,7 @@ def download_fonts(output_directory):
             print(f"File '{name}' already exists. Skipping download.")
         else:
             # Use wget to download the file with the specified name
-            os.system(f'wget -O "{output_directory}/{name}" "{link}"')
+            os.system(f'wget -q --show-progress -O "{output_directory}/{name}" "{link}"')
 
     print("Downloads complete!")
 

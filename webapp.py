@@ -24,7 +24,7 @@ app.config["SECRET_KEY"]=os.getenv('FLASK_SECRET')
 
 @app.route('/')
 def index():
-    return render_template('mainpage.html')
+    return render_template('mainpage.html', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
 
 
 @app.route('/result', methods = ['POST', 'GET'])
@@ -36,13 +36,13 @@ def result():
 
         # check that input is not empty
         if album_link == "" or album_link is None:
-            return render_template('mainpage.html', warning_notification='Input field cannot be empty')
+            return render_template('mainpage.html', warning_notification='Input field cannot be empty', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
 
         # check values for height and width
         if width < 300 or height < 450:  # width and height have minimum requirements
-            return render_template('mainpage.html', warning_notification='Width must be at least 300px and height must be at least 450px')
+            return render_template('mainpage.html', warning_notification='Width must be at least 300px and height must be at least 450px', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
         if height < width * 1.25 or height > width * 2:  # height must be between 30% and 100% larger than width
-            return render_template('mainpage.html', warning_notification='Height must be between 25% and 100% larger than width')
+            return render_template('mainpage.html', warning_notification='Height must be between 25% and 100% larger than width', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
         
         # poster options
         options = {}
@@ -67,14 +67,14 @@ def result():
             ]
     
         if not any(re.match(pattern, album_link) for pattern in patterns):
-            return render_template('mainpage.html', warning_notification='Invalid album link')
+            return render_template('mainpage.html', warning_notification='Invalid album link', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
 
         # generate poster
         poster, album_name = generator(album_link, (width, height), options)
 
         # check that album data was fetched
         if poster is None or album_name is None:
-            return render_template('mainpage.html', warning_notification=f'Failed to get album data based on input "{album_link}"')
+            return render_template('mainpage.html', warning_notification=f'Failed to get album data based on input "{album_link}"', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
 
         poster_bytes = io.BytesIO()
         poster.save(poster_bytes, "png")
@@ -89,7 +89,7 @@ def result():
 
     else:
         # redirect to home screen if result page is called in browser
-        return redirect('/')
+        return redirect('/', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
 
 
 if __name__ == '__main__':

@@ -30,6 +30,9 @@ To run this for yourself locally, you'll need a .env file with the following val
 - SPOTIFY_ID = `your spotify client id`
 - FLASK_SECRET = `your flask secret code`
 
+The main runfile is poster_generator.py.
+
+If you want to run the Flask webapp, you'll need a few more env variables, which you can email me about.
 ---
 Big thanks to @sudmike for contributing to the repository and coming up with ideas!
 > The website probably wont be up all the time, just email me if you need one.

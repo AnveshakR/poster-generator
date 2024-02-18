@@ -10,10 +10,10 @@
 
 from PIL import ImageFont, ImageDraw
 from skimage import io
-from utils import *
+from src.utils import *
 import os
 import re
-from download_fonts import download_fonts
+from src.download_fonts import download_fonts
 import requests
 import re
 
@@ -21,7 +21,7 @@ import re
 MAINPATH = os.path.dirname(os.path.realpath(__file__))
 
 # adds font directory to path
-FONTDIR = os.path.join(MAINPATH, 'fonts')
+FONTDIR = os.path.join(MAINPATH, 'src', 'fonts')
 
 if not os.path.exists(FONTDIR):
     download_fonts(FONTDIR)

@@ -249,9 +249,17 @@ if __name__ == '__main__':
 
     if theme == '':
         theme = 'light'
+    
+    remove_artist_names = input("Remove featured artists from tracklist? (yes/no): ")
+    if remove_artist_names == 'yes':
+        remove_artist_names = True
+    else:
+        remove_artist_names = False
 
-    poster, album_name = generator(album, resolution, theme)
+    options = {'theme': theme, 'remove_featured_artists': remove_artist_names}
 
-    poster.save(f"{album_name}_{theme}_poster.png")
+    poster, filename = generator(album, resolution, options)
+
+    poster.save(f"{filename}_poster.png")
 
     poster.show()

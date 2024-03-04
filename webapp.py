@@ -62,15 +62,20 @@ def result():
             album_link = requests.get(album_link).url
 
         patterns = [
-            (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)'),
-            (r'^spotify:album:([a-zA-Z0-9]+)'),
+            (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)', 'albums'),
+            (r'^spotify:album:([a-zA-Z0-9]+)', 'albums'),
+            (r'^https://open\.spotify\.com/track/([a-zA-Z0-9]+)', 'tracks'),
+            (r'^spotify:track:([a-zA-Z0-9]+)', 'tracks')
             ]
     
-        if not any(re.match(pattern, album_link) for pattern in patterns):
+        if not any(re.match(pattern, album_link) for pattern, _ in patterns):
             return render_template('mainpage.html', warning_notification='Invalid album link', ns=os.getenv('NAMESPACE'), key=os.getenv("KEY"))
 
+        link_type = next(link_type for pattern, link_type in patterns if re.match(pattern, album_link))
+        link_id = next(re.match(pattern, album_link).group(1) for pattern, _ in patterns if re.match(pattern, album_link))
+    
         # generate poster
-        poster, album_name = generator(album_link, (width, height), options)
+        poster, album_name = generator(link_id, (width, height), options, link_type)
 
         # check that album data was fetched
         if poster is None or album_name is None:

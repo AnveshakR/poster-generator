@@ -58,9 +58,9 @@ def get_font_by_lang(langid_classify, text_type):
             return fonts['source-code-pro.light.ttf']
 
 
-def generator(album, resolution, options) -> ImageDraw:
+def generator(link_id, resolution, options: dict, link_type="albums") -> ImageDraw:
 
-    data = spotify_data_pull(album)
+    data = spotify_data_pull(link_id, link_type)
 
     # ensure that album data could be fetched
     if data is None:
@@ -224,19 +224,33 @@ def generator(album, resolution, options) -> ImageDraw:
 
 if __name__ == '__main__':
 
-    album = input("Enter Spotify Album link: ")
+    album = input("Enter Spotify Album/Song link: ")
 
     if re.match(r'https://spotify.link/([a-zA-Z0-9]+)', album):
         album = requests.get(album).url
 
-    patterns = [
-        (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)'),
-        (r'^spotify:album:([a-zA-Z0-9]+)'),
-        ]
+    # patterns = [
+    #     (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)'),
+    #     (r'^spotify:album:([a-zA-Z0-9]+)'),
+    #     ]
     
-    if not any(re.match(pattern, album) for pattern in patterns):
-        print("Invalid Spotify Album link")
+    # if not any(re.match(pattern, album) for pattern in patterns):
+    #     print("Invalid Spotify Album link")
+    #     exit()
+
+    patterns = [
+        (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)', 'albums'),
+        (r'^spotify:album:([a-zA-Z0-9]+)', 'albums'),
+        (r'^https://open\.spotify\.com/track/([a-zA-Z0-9]+)', 'tracks'),
+        (r'^spotify:track:([a-zA-Z0-9]+)', 'tracks')
+        ]
+
+    if not any(re.match(pattern, album) for pattern, _ in patterns):
+        print("Invalid link")
         exit()
+
+    link_type = next(link_type for pattern, link_type in patterns if re.match(pattern, album))
+    link_id = next(re.match(pattern, album).group(1) for pattern, _ in patterns if re.match(pattern, album))
 
     resolution = input("Enter height, width in pixels: ")
 
@@ -258,7 +272,7 @@ if __name__ == '__main__':
 
     options = {'theme': theme, 'remove_featured_artists': remove_artist_names}
 
-    poster, filename = generator(album, resolution, options)
+    poster, filename = generator(link_id, resolution, options, link_type)
 
     poster.save(f"{filename}_poster.png")
 

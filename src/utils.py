@@ -38,19 +38,7 @@ def get_access_token():
     return access_token
 
 
-def spotify_data_pull(album):
-    album_url_base = r'https://open.spotify.com/album/'
-    album_get = 'https://api.spotify.com/v1/albums/{id}'
-
-    # check format of album url
-    if album_url_base not in album:
-        return None
-
-    # remove query parameters if present
-    if '?' in album:
-        album = album[:album.find('?')]
-
-    id = album[album.find(album_url_base)+len(album_url_base):]
+def spotify_data_pull(id, link_type='albums'):
 
     access_token = get_access_token()
     
@@ -58,7 +46,17 @@ def spotify_data_pull(album):
         'Authorization': 'Bearer ' + access_token
     }
 
-    r = requests.get(album_get.format(id=id), headers=headers)
+    if link_type == 'tracks':
+        print(id)
+        print("\n----------------\n")
+        tracks_get = f'https://api.spotify.com/v1/tracks/{id}'
+        r = requests.get(tracks_get, headers=headers)
+        r = r.json()
+        id = r['album']['id']
+
+    album_get = f'https://api.spotify.com/v1/albums/{id}'
+
+    r = requests.get(album_get, headers=headers)
     r = r.json()
 
     # ensure that response from Spotify contains necessary data

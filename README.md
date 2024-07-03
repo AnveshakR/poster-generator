@@ -1,7 +1,5 @@
 # Spotify Poster Generator
 
-https://spotifyposters.live/
-
 Does what it says on the tin.
 
 Enter a (valid) Spotify album/song URL, receive a poster!
@@ -31,10 +29,8 @@ To run this for yourself locally, you'll need a .env file with the following val
 - SPOTIFY_ID = `your spotify client id`
 - FLASK_SECRET = `your flask secret code`
 
-The main runfile is poster_generator.py.
-
-If you want to run the Flask webapp.py, you might need a few more env variables, which you can email me about.
+Use `poster_generator.py` for the CLI interface, and `webapp.py` to run the Flask server UI (recommended)
 
 ---
 Big thanks to @sudmike for contributing to the repository and coming up with ideas!
-> The website probably wont be up all the time, just email me if you need one.
+> The website is down indefinitely, feel free to clone the repo and run it locally. Don't hesitate to raise an issue on the repo for any questions/bugs!

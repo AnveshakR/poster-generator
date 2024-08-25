@@ -19,6 +19,7 @@ import datetime
 from io import BytesIO
 from PIL import Image
 import langid
+import time
 
 load_dotenv()
 
@@ -181,7 +182,19 @@ def dominant_colors(image):
 
 
 def image_from_url(url: str):
-    r = requests.get(url, stream=True)
+    headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0",
+    "Accept-Encoding": "*",
+    "Connection": "keep-alive"
+    }
+    while(True):
+        try:
+            r = requests.get(url, headers=headers)
+        except:
+            time.sleep(1)
+            continue
+        break
+            
     if r.ok is True:
         # Load the image using BytesIO and open it with PIL
         image_data = BytesIO(r.content)

@@ -22,10 +22,15 @@ def download_fonts(output_directory):
             print(f"File '{name}' already exists. Skipping download.")
         else:
             # Use wget to download the file with the specified name
-            os.system(f'wget -q --show-progress -O "{output_directory}/{name}" "{link}"')
+            os.system(f'echo Downloading {name}... && curl -# -o "{output_directory}/{name}" "{link}"')
 
     print("Downloads complete!")
 
 
 if __name__ == "__main__":
-    download_fonts()
+    # gets path of current script
+    CURRPATH = os.path.dirname(os.path.realpath(__file__))
+
+    # adds font directory to path
+    FONTDIR = os.path.join(CURRPATH, 'fonts')
+    download_fonts(FONTDIR)

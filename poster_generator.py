@@ -8,7 +8,7 @@
     You should have received a copy of the GNU General Public License along with poster-gen. If not, see <https://www.gnu.org/licenses/>.
 """
 
-from PIL import ImageFont, ImageDraw
+from PIL import ImageFont, ImageDraw, Image
 from skimage import io
 from src.utils import *
 import os
@@ -274,6 +274,9 @@ if __name__ == '__main__':
 
     poster, filename = generator(link_id, resolution, options, link_type)
 
-    poster.save(f"{filename}_poster.png")
-    print("Poster saved!")
+    savepath = os.path.join(MAINPATH, f"{filename}_poster.png")
+    
+    poster.save(savepath)
+    print(f"Poster saved at {savepath}!")
+   
     poster.show()

@@ -275,5 +275,5 @@ if __name__ == '__main__':
     poster, filename = generator(link_id, resolution, options, link_type)
 
     poster.save(f"{filename}_poster.png")
-
+    print("Poster saved!")
     poster.show()

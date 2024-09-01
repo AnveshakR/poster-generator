@@ -48,8 +48,6 @@ def spotify_data_pull(id, link_type='albums'):
     }
 
     if link_type == 'tracks':
-        print(id)
-        print("\n----------------\n")
         tracks_get = f'https://api.spotify.com/v1/tracks/{id}'
         r = requests.get(tracks_get, headers=headers)
         r = r.json()

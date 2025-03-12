@@ -16,6 +16,8 @@ import re
 from src.download_fonts import download_fonts
 import requests
 import re
+import questionary
+from rich import print
 
 # gets path of current script
 MAINPATH = os.path.dirname(os.path.realpath(__file__))
@@ -224,53 +226,69 @@ def generator(link_id, resolution, options: dict, link_type="albums") -> ImageDr
 
 if __name__ == '__main__':
 
-    album = input("Enter Spotify Album/Song link: ")
+    album = questionary.text("Enter Spotify Album/Song link:").ask()
 
+    # Expand short links if necessary
     if re.match(r'https://spotify.link/([a-zA-Z0-9]+)', album):
         album = requests.get(album).url
 
-    # patterns = [
-    #     (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)'),
-    #     (r'^spotify:album:([a-zA-Z0-9]+)'),
-    #     ]
-    
-    # if not any(re.match(pattern, album) for pattern in patterns):
-    #     print("Invalid Spotify Album link")
-    #     exit()
-
+    # Define matching patterns
     patterns = [
         (r'^https://open\.spotify\.com/album/([a-zA-Z0-9]+)', 'albums'),
         (r'^spotify:album:([a-zA-Z0-9]+)', 'albums'),
         (r'^https://open\.spotify\.com/track/([a-zA-Z0-9]+)', 'tracks'),
         (r'^spotify:track:([a-zA-Z0-9]+)', 'tracks')
-        ]
+    ]
 
-    if not any(re.match(pattern, album) for pattern, _ in patterns):
-        print("Invalid link")
+    # Validate link
+    match = next(((pattern, link_type) for pattern, link_type in patterns if re.match(pattern, album)), None)
+    if not match:
+        print("[bold red]Invalid link. Please enter a valid Spotify Album or Song link.[/bold red]")
         exit()
 
-    link_type = next(link_type for pattern, link_type in patterns if re.match(pattern, album))
-    link_id = next(re.match(pattern, album).group(1) for pattern, _ in patterns if re.match(pattern, album))
+    pattern, link_type = match
+    link_id = re.match(pattern, album).group(1)
 
-    resolution = input("Enter height, width in pixels: ")
+    # Resolution options
+    resolution_options = {
+        "A3": (3510, 4950),
+        "A4": (2480, 3508),
+        "A2": (4950, 7020),
+        "A1": (7020, 9930),
+        "18 x 24 inches": (5400, 7200),
+        "24 x 36 inches": (7200, 10800),
+        "12 x 18 inches": (3600, 5400),
+        "11 x 17 inches": (3300, 5100),
+        "Custom": "custom"
+    }
 
-    theme = input("Enter theme (light/dark): ")
-    
-    if resolution == '':
-        resolution = (3300, 5100)
+    # Prompt user for resolution selection
+    resolution_choice = questionary.select("Choose a resolution:", choices=list(resolution_options.keys())).ask()
+    if resolution_options[resolution_choice] == "custom":
+        custom_resolution = questionary.text("Enter custom height, width in pixels:").ask()
+        resolution = tuple(map(int, custom_resolution.strip().split(',')))
     else:
-        resolution = tuple(map(int, resolution.strip().split(',')))
+        resolution = resolution_options[resolution_choice]
 
-    if theme == '':
-        theme = 'light'
-    
-    remove_artist_names = input("Remove featured artists from tracklist? (yes/no): ")
-    if remove_artist_names == 'yes':
-        remove_artist_names = True
-    else:
-        remove_artist_names = False
+    # Prompt user for theme
+    theme = questionary.select("Choose a theme:", choices=["light", "dark"]).ask() or "light"
 
-    options = {'theme': theme, 'remove_featured_artists': remove_artist_names}
+    # Prompt user to remove featured artists
+    remove_artist_names = questionary.confirm("Remove featured artists from tracklist?").ask()
+
+    # Store options
+    options = {
+        'theme': theme,
+        'remove_featured_artists': remove_artist_names
+    }
+
+    # Print summary
+    print("\n[bold green]Configuration Summary:[/bold green]")
+    print(f"- [cyan]Link Type:[/cyan] {link_type}")
+    print(f"- [cyan]Link ID:[/cyan] {link_id}")
+    print(f"- [cyan]Resolution:[/cyan] {resolution}")
+    print(f"- [cyan]Theme:[/cyan] {theme}")
+    print(f"- [cyan]Remove Featured Artists:[/cyan] {remove_artist_names}")
 
     poster, filename = generator(link_id, resolution, options, link_type)
 

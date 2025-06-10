@@ -24,7 +24,7 @@ Pygments==2.19.1
 python-dotenv==1.0.1
 PyWavelets==1.7.0
 questionary==2.1.0
-requests==2.32.3
+requests==2.32.4
 rich==13.9.4
 scikit-image==0.24.0
 scikit-learn==1.5.1

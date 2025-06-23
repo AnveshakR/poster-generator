@@ -32,6 +32,6 @@ scipy==1.14.1
 threadpoolctl==3.5.0
 tifffile==2024.8.10
 typing_extensions==4.12.2
-urllib3==2.2.2
+urllib3==2.5.0
 wcwidth==0.2.13
 Werkzeug==3.0.6
